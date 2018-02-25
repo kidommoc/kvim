@@ -1,0 +1,40 @@
+# v 1.0
+
+- open one file
+- operation: h j k l i a s x o O dd
+- command: w q !
+
+# v 1.1
+
+- line num
+- operation: \<num\>{hjkl} \<num\>dd
+
+# v 1.2
+
+- display doc property
+- operation: \<num\>G gg ^ 0 $ ^u ^d
+
+# v 1.3
+
+- search
+- operation: \<num\>{fFtT}\<char\>
+- command: /
+
+# v 1.4
+
+- clipboard
+- operation: \<num\>yy \<num\>p \<num\>P
+
+# v 1.5
+
+- high-light
+- config file support
+
+# v 1.6
+
+- multi-doc
+- operation: ^w{hjkl}
+
+# v 1.7
+
+- auto-indent
