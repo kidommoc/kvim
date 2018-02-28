@@ -1,6 +1,12 @@
 #ifndef KVIM_H
 #define KVIM_H
 
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+
 /* === Struct === */
 
 /* Row: represent a row in the doc
@@ -50,5 +56,13 @@ struct Kvim
 	int cx, cy;
 	int mode;
 } kvim;
+
+/* === Declaration === */
+
+/* --- doc.c --- */
+int charsInsert (Row *row, char *chars, int at, int len);
+int charsDelete (Row *row, int from, int len);
+int rowsInsert (Doc *doc, Row *rows, int at, int len);
+int rowsDelete (Doc *doc, int from, int len);
 
 #endif /* KVIM_H */
