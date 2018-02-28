@@ -59,6 +59,10 @@ struct Kvim
 
 /* === Declaration === */
 
+/* --- fileio.c --- */
+int docOpen (Doc* doc, char *filename);
+int docSave (Doc* doc);
+
 /* --- doc.c --- */
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
