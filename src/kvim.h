@@ -84,4 +84,7 @@ int docOpen (Doc *doc, char *filename);
 int docSave (Doc *doc);
 int docClose (Doc *doc);
 
+/* --- handle.c --- */
+int handleKey (int fd);
+
 #endif /* KVIM_H */
