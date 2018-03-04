@@ -6,6 +6,14 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
+
+/* --- Key --- */
+#define ESC 27
+#define BACKSPACE 127
+#define DEL 28
+#define TAB 9
+#define ENTER 10
 
 /* === Struct === */
 
@@ -17,10 +25,10 @@
  */
 typedef struct Row
 {
-	char *content;
 	int len;
-	char *render;
 	int rlen;
+	char *content;
+	char *render;
 } Row;
 
 /* Doc: represent a document in the editor
@@ -32,11 +40,12 @@ typedef struct Row
  */
 typedef struct Doc
 {
-	Row *rows;
 	int len;
-	int crow, ccol;
+	int crow, ccol, crcol;
 	int fd;
 	int modified;
+	char *filename;
+	Row *rows;
 } Doc;
 
 /* --- Editor mode --- */
@@ -59,14 +68,19 @@ struct Kvim
 
 /* === Declaration === */
 
-/* --- fileio.c --- */
-int docOpen (Doc* doc, char *filename);
-int docSave (Doc* doc);
+/* --- display.c --- */
+#define TABSTOP 4
+int updateRender (Row *row);
+int updateScreen (Doc *doc);
 
 /* --- doc.c --- */
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 int rowsInsert (Doc *doc, Row *rows, int at, int len);
 int rowsDelete (Doc *doc, int from, int len);
+
+/* --- fileio.c --- */
+int docOpen (Doc *doc, char *filename);
+int docSave (Doc *doc);
 
 #endif /* KVIM_H */

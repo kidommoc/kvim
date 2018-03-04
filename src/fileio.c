@@ -1,25 +1,29 @@
 #include "kvim.h"
+#include <stdio.h>
 
 /* docOpen: open <filename> and store in <doc>
  */
 int docOpen (Doc* doc, char *filename)
 {
+	doc->filename = filename;
 	doc->fd = open (filename, O_RDWR|O_CREAT);
 	char *buffer = malloc (1);
 	Row *row = malloc (sizeof (Row));
-	row->len = 0;
 	row->content = NULL;
+	row->len = 0;
+	row->render = NULL;
+	row->rlen = 0;
 	while (read (doc->fd, buffer, 1) != 0)
 	{
 		if (*buffer == '\n')
 		{
-			/*
 			updateRender (row);
-			*/
 			rowsInsert (doc, row, doc->len, 1);
-			Row *row = malloc (sizeof (Row));
-			row->len = 0;
+			row = malloc (sizeof (Row));
 			row->content = NULL;
+			row->len = 0;
+			row->render = NULL;
+			row->rlen = 0;
 		}
 		else
 			charsInsert (row, buffer, row->len, 1);
@@ -43,5 +47,23 @@ int docSave (Doc* doc)
 	}
 	doc->modified = 0;
 
+	return 0;
+}
+
+/* docClose: close <doc>
+ */
+int docClose (Doc *doc)
+{
+	close (doc->fd);
+	for (int i = 0; i < doc->len; ++i)
+	{
+		Row *row = &doc->rows[i];
+		if (row->content)
+			free (row->content);
+		if (row->render)
+			free (row->render);
+	}
+	free (doc->rows);
+	free (doc);
 	return 0;
 }
