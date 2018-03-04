@@ -4,6 +4,8 @@
  */
 int charsInsert (Row *row, char *chars, int at, int len)
 {
+	/* if out of range, error
+	 */
 	if (at < 0 || at > row->len)
 		return 1;
 
@@ -20,6 +22,8 @@ int charsInsert (Row *row, char *chars, int at, int len)
  */
 int charsDelete (Row *row, int from, int len)
 {
+	/* if out of range, error
+	 */
 	if (from < 0 || from > row->len)
 		return 1;
 
@@ -39,6 +43,8 @@ int charsDelete (Row *row, int from, int len)
  */
 int rowsInsert (Doc *doc, Row *rows, int at, int len)
 {
+	/* if out of range, error
+	 */
 	if (at < 0 || at > doc->len)
 		return 1;
 
@@ -55,8 +61,18 @@ int rowsInsert (Doc *doc, Row *rows, int at, int len)
  */
 int rowsDelete (Doc *doc, int from, int len)
 {
+	/* if out of range, error
+	 */
 	if (from < 0 || from > doc->len)
 		return 1;
+
+	for (int i = from; i < doc->len && i < from + len; ++i)
+	{
+		if (doc->rows[i].content)
+			free (doc->rows[i].content);
+		if (doc->rows[i].render)
+			free (doc->rows[i].render);
+	}
 
 	if (from + len < doc->len)
 	{
