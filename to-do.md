@@ -6,7 +6,7 @@
 
 # v 1.1
 
-- line num
+- display line num
 - operation: \<num\>{hjkl} \<num\>dd a s O w e
 
 # v 1.2
