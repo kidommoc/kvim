@@ -82,5 +82,6 @@ int rowsDelete (Doc *doc, int from, int len);
 /* --- fileio.c --- */
 int docOpen (Doc *doc, char *filename);
 int docSave (Doc *doc);
+int docClose (Doc *doc);
 
 #endif /* KVIM_H */
