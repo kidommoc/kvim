@@ -18,7 +18,6 @@
 
 - search
 - operation: \<num\>{fFtT}\<char\> n N
-- command: /
 
 # v 1.4
 
