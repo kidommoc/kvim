@@ -8,6 +8,9 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#define MAX(a,b) (a > b ? a : b)
+#define MIN(a,b) (a < b ? a : b)
+
 /* --- Key --- */
 #define ESC 27
 #define BACKSPACE 127
