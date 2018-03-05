@@ -229,6 +229,29 @@ int handleNormal (char c)
 		case 'l':
 			cursorRight (doc);
 			break;
+		case 'i':
+			kvim.mode = MODE_INSERT;
+			doc->crcol = doc->ccol;
+			break;
+		case 'x':
+			if (doc->rows[doc->crow].content != NULL)
+			{
+				charsDelete (&doc->rows[doc->crow], doc->ccol, 1);
+				updateRender (&doc->rows[doc->crow]);
+			}
+			doc->crcol = doc->ccol;
+			doc->modified = 1;
+			break;
+		case 'o':
+			rowsInsert (doc, newRow (), doc->crow + 1, 1);
+			doc->modified = 1;
+			cursorDown (doc);
+			doc->ccol = 0;
+			kvim.cx = 0;
+			doc->crcol = doc->ccol;
+			kvim.mode = MODE_INSERT;
+			break;
+			break;
 		default:
 			break;
 	}
