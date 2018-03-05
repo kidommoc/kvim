@@ -7,26 +7,29 @@ int docOpen (Doc* doc, char *filename)
 {
 	doc->filename = filename;
 	doc->fd = open (filename, O_RDWR|O_CREAT);
-	char *buffer = malloc (1);
-	Row *row = malloc (sizeof (Row));
-	row->content = NULL;
-	row->len = 0;
-	row->render = NULL;
-	row->rlen = 0;
-	while (read (doc->fd, buffer, 1) != 0)
+	char buffer;
+	Row *row = newRow ();
+	int new = 0;
+	while (read (doc->fd, &buffer, 1) != 0)
 	{
-		if (*buffer == '\n')
+		if (buffer == '\n')
 		{
 			updateRender (row);
 			rowsInsert (doc, row, doc->len, 1);
-			row = malloc (sizeof (Row));
-			row->content = NULL;
-			row->len = 0;
-			row->render = NULL;
-			row->rlen = 0;
+			free (row);
+			row = newRow ();
+			new = 0;
 		}
 		else
-			charsInsert (row, buffer, row->len, 1);
+		{
+			charsInsert (row, &buffer, row->len, 1);
+			new = 1;
+		}
+	}
+	if (new)
+	{
+		updateRender (row);
+		rowsInsert (doc, row, doc->len, 1);
 	}
 
 	return 0;

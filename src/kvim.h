@@ -76,6 +76,7 @@ int updateScreen (Doc *doc);
 /* --- doc.c --- */
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
+Row* newRow (void);
 int rowsInsert (Doc *doc, Row *rows, int at, int len);
 int rowsDelete (Doc *doc, int from, int len);
 
@@ -86,5 +87,10 @@ int docClose (Doc *doc);
 
 /* --- handle.c --- */
 int handleKey (int fd);
+
+/* --- termlib.c --- */
+int termInit (int fdin, int fdout);
+int cursorMove (int fd, int x, int y);
+int getKey (int fd);
 
 #endif /* KVIM_H */
