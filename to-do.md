@@ -16,8 +16,8 @@
 
 # v 1.3
 
-- search
-- operation: \<num\>{fFtT}\<char\> n N
+- search and replace
+- operation: \<num\>{fFtT}\<char\> n N r R
 
 # v 1.4
 
