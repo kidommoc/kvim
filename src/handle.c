@@ -268,6 +268,27 @@ int handleInsert (char c)
 			kvim.mode = MODE_NORMAL;
 			cursorLeft (doc);
 			break;
+		case BACKSPACE:
+			cursorLeft (doc);
+			handleInsert (DEL);
+			break;
+		case DEL:
+			if (doc->ccol < doc->rows[doc->crow].len)
+			{
+				charsDelete (&doc->rows[doc->crow], doc->ccol, 1);
+				updateRender (&doc->rows[doc->crow]);
+			}
+			else if (doc->crow < doc->len - 1)
+			{
+				charsInsert (&doc->rows[doc->crow],
+					doc->rows[doc->crow + 1].content,
+					doc->rows[doc->crow].len,
+					doc->rows[doc->crow + 1].len);
+				rowsDelete (doc, doc->crow + 1, 1);
+				updateRender (&doc->rows[doc->crow]);
+			}
+			doc->modified = 1;
+			break;
 		case TAB:
 			charsInsert (&doc->rows[doc->crow], &c, doc->ccol, 1);
 			updateRender (&doc->rows[doc->crow]);
