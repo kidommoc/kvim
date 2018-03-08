@@ -11,6 +11,9 @@
 #define MAX(a,b) (a > b ? a : b)
 #define MIN(a,b) (a < b ? a : b)
 
+#define STDIN STDIN_FILENO
+#define STDOUT STDOUT_FILENO
+
 /* --- Key --- */
 #define ESC 27
 #define BACKSPACE 127
@@ -63,10 +66,11 @@ typedef struct Doc
  */
 struct Kvim
 {
-	Doc *doc;
 	int cols, rows;
 	int cx, cy;
 	int mode;
+	char *status;
+	Doc *doc;
 } kvim;
 
 /* === Declaration === */
@@ -89,11 +93,11 @@ int docSave (Doc *doc);
 int docClose (Doc *doc);
 
 /* --- handle.c --- */
-int handleKey (int fd);
+int handleKey (void);
 
 /* --- termlib.c --- */
-int termInit (int fdin, int fdout);
-int cursorMove (int fd, int x, int y);
-int getKey (int fd);
+int termInit (void);
+int cursorMove (int x, int y);
+int getKey (void);
 
 #endif /* KVIM_H */

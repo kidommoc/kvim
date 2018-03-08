@@ -2,35 +2,31 @@
 
 /* termInit: initialize the tty
  */
-int termInit (int fdin, int fdout)
+int termInit (void)
 {
 	struct termios term;
-	tcgetattr (fdin, &term);
-	/* disable echo and canonical mode of stdin
+	tcgetattr (STDIN, &term);
+	/* disable echo, canonical mode and signal of stdin
 	 */
-	term.c_lflag &= ~(ECHO|ICANON);
-	/* disable ^c
-	 */
-	term.c_lflag |= ISIG;
-	term.c_cc[VINTR] = _POSIX_VDISABLE;
-	tcsetattr (fdin, TCSADRAIN, &term);
-	tcgetattr (fdout, &term);
+	term.c_lflag &= ~(ECHO | ICANON | ISIG);
+	tcsetattr (STDIN, TCSADRAIN, &term);
+	tcgetattr (STDOUT, &term);
 	/* disable canonical mode of stdout
 	 */
 	term.c_lflag &= ~ICANON;
-	tcsetattr (fdout, TCSADRAIN, &term);
+	tcsetattr (STDOUT, TCSADRAIN, &term);
 
 	/* clear the screen
 	 * move cursor to 1,1
 	 */
-	write (fdout, "\x1b[2J\x1b[H", 7);
+	write (STDOUT, "\x1b[2J\x1b[H", 7);
 	kvim.cx = 1;
 	kvim.cy = 1;
 
 	/* get tty size
 	 */
 	struct winsize sz;
-	ioctl (fdin, TIOCGWINSZ, (char*) &sz);
+	ioctl (STDIN, TIOCGWINSZ, (char*) &sz);
 	kvim.rows = sz.ws_row - 1;
 	kvim.cols = sz.ws_col;
 
@@ -39,7 +35,7 @@ int termInit (int fdin, int fdout)
 
 /* cursorMove: move cursor to <x>, <y>
  */
-int cursorMove (int fd, int x, int y)
+int cursorMove (int x, int y)
 {
 	if (x <= 0 || x > kvim.cols || y <= 0 || y > kvim.rows)
 		return 1;
@@ -74,10 +70,12 @@ int cursorMove (int fd, int x, int y)
 	++len;
 	s = realloc (s, len);
 	s[len - 1] = 'H';
-	write (fd, s, len);
+	write (STDOUT, s, len);
 	return 0;
 }
 
-int getKey (int fd)
+/* getKey: return the key pressed
+ */
+int getKey (void)
 {
 }

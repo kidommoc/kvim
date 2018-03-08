@@ -210,6 +210,7 @@ int cursorDown (Doc *doc)
 	}
 }
 
+
 /* handleNormal: handle key <c> in normal mode
  */
 int handleNormal (char c)
@@ -402,9 +403,9 @@ int handleInsert (char c)
 
 /* handleKey: handle input from <fd>
  */
-int handleKey (int fd)
+int handleKey (void)
 {
-	char c = getKey (fd);
+	char c = getKey ();
 	switch (kvim.mode)
 	{
 		case MODE_NORMAL:
