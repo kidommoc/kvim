@@ -26,25 +26,25 @@
 
 # v 1.5
 
-- visual mode
-- operation: v
-
-# v 1.5
-
 - high-light
 - config file support
 
 # v 1.6
 
+- visual mode
+- operation: v
+
+# v 1.7
+
 - multi-doc
 - operation: ^w{hjkl}
 - command: :split :vsplit
 
-# v 1.7
+# v 1.8
 
 - visual block mode
 - operation: ^v
 
-# v 1.8
+# v 1.9
 
 - auto-indent (C)
