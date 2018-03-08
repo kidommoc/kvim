@@ -9,6 +9,11 @@ int termInit (void)
 	/* disable echo, canonical mode and signal of stdin
 	 */
 	term.c_lflag &= ~(ECHO | ICANON | ISIG);
+	/* 100 ms timeout
+	 * return each byte or 0 when timeout
+	 */
+	term.c_cc[VTIME] = 1;
+	term.c_cc[VMIN] = 0;
 	tcsetattr (STDIN, TCSADRAIN, &term);
 	tcgetattr (STDOUT, &term);
 	/* disable canonical mode of stdout
@@ -78,4 +83,49 @@ int cursorMove (int x, int y)
  */
 int getKey (void)
 {
+	while (1)
+	{
+		char c, buf[3];
+		while (read (STDIN, &c, 1) == 0)
+			;
+
+		switch (c)
+		{
+			/* ESC sequence
+			 */
+			case ESC:
+				if (read (STDIN, &buf[0], 1) == 0)
+					return ESC;
+				if (read (STDIN, &buf[1], 1) == 0)
+					return ESC;
+
+				/* ESC[ sequence
+				 */
+				if (buf[0] == '[')
+				{
+					if (buf[1] >= '0' && buf[1] <= '9')
+					{
+						if (read(STDIN, &buf[2], 1) == 0)
+							return ESC;
+						if (buf[1] == '3' && buf[2] == '~')
+							return DEL;
+					}
+					else
+						switch (buf[1])
+						{
+							case 'A':
+								return 'k';
+							case 'B':
+								return 'j';
+							case 'C':
+								return 'l';
+							case 'D':
+								return 'h';
+						}
+				}
+				break;
+			default:
+				return c;
+		}
+	}
 }
