@@ -69,6 +69,7 @@ struct Kvim
 	int cols, rows;
 	int cx, cy;
 	int mode;
+	struct termios termIn, termOut;
 	char *status;
 	Doc *doc;
 } kvim;

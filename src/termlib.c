@@ -6,6 +6,7 @@ int termInit (void)
 {
 	struct termios term;
 	tcgetattr (STDIN, &term);
+	memcpy (&kvim.termIn, &term, sizeof (struct termios));
 	/* disable echo, canonical mode and signal of stdin
 	 */
 	term.c_lflag &= ~(ECHO | ICANON | ISIG);
@@ -16,6 +17,7 @@ int termInit (void)
 	term.c_cc[VMIN] = 0;
 	tcsetattr (STDIN, TCSADRAIN, &term);
 	tcgetattr (STDOUT, &term);
+	memcpy (&kvim.termOut, &term, sizeof (struct termios));
 	/* disable canonical mode of stdout
 	 */
 	term.c_lflag &= ~ICANON;
