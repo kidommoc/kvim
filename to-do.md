@@ -16,35 +16,41 @@
 
 # v 1.3
 
-- search and replace
-- operation: \<num\>{fFtT}\<char\> n N r R
-
-# v 1.4
-
 - clipboard
 - operation: \<num\>yy \<num\>p \<num\>P
 
-# v 1.5
+# v 1.4
 
 - high-light
 - config file support
 
+# v 1.5
+
+- search and replace
+- operation: \<num\>{fFtT}\<char\> n N r R
+- command: \
+
 # v 1.6
+
+- fold
+- operation: zc zo zr zm
+
+# v 1.7
 
 - visual mode
 - operation: v
 
-# v 1.7
+# v 1.8
 
 - multi-doc
 - operation: ^w{hjkl}
 - command: :split :vsplit
 
-# v 1.8
+# v 1.9
 
 - visual block mode
 - operation: ^v
 
-# v 1.9
+# v 2.0
 
 - auto-indent (C)
