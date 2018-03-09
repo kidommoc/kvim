@@ -104,7 +104,6 @@ int getKey (void)
 				/* ESC[ sequence
 				 */
 				if (buf[0] == '[')
-				{
 					if (buf[1] >= '0' && buf[1] <= '9')
 					{
 						if (read(STDIN, &buf[2], 1) == 0)
@@ -116,15 +115,14 @@ int getKey (void)
 						switch (buf[1])
 						{
 							case 'A':
-								return 'k';
+								return ARROWUP;
 							case 'B':
-								return 'j';
+								return ARROWDOWN;
 							case 'C':
-								return 'l';
+								return ARROWRIGHT;
 							case 'D':
-								return 'h';
+								return ARROWLEFT;
 						}
-				}
 				break;
 			default:
 				return c;

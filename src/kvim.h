@@ -20,6 +20,10 @@
 #define DEL 28
 #define TAB 9
 #define ENTER 10
+#define ARROWUP 11
+#define ARROWDOWN 12
+#define ARROWRIGHT 13
+#define ARROWLEFT 14
 
 /* === Struct === */
 

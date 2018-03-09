@@ -210,7 +210,6 @@ int cursorDown (Doc *doc)
 	}
 }
 
-
 /* handleNormal: handle key <c> in normal mode
  */
 int handleNormal (char c)
@@ -219,15 +218,19 @@ int handleNormal (char c)
 	switch (c)
 	{
 		case 'h':
+		case ARROWLEFT:
 			cursorLeft (doc);
 			break;
 		case 'j':
+		case ARROWDOWN:
 			cursorDown (doc);
 			break;
 		case 'k':
+		case ARROWUP:
 			cursorUp (doc);
 			break;
 		case 'l':
+		case ARROWRIGHT:
 			cursorRight (doc);
 			break;
 		case 'i':
