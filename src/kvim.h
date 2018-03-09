@@ -100,6 +100,7 @@ int handleKey (void);
 
 /* --- termlib.c --- */
 int termInit (void);
+int termExit (void);
 int cursorMove (int x, int y);
 int getKey (void);
 int printContent (Doc *doc);

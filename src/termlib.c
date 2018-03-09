@@ -40,6 +40,16 @@ int termInit (void)
 	return 0;
 }
 
+/* termExit: recover tty from stored status
+ */
+int termExit (void)
+{
+	tcsetattr (STDIN, TCSADRAIN, &kvim.termIn);
+	tcsetattr (STDOUT, TCSADRAIN, &kvim.termOut);
+	write (STDOUT, "\x1b[2J\x1b[H", 7);
+	return 0;
+}
+
 /* cursorMove: move cursor to <x>, <y>
  */
 int cursorMove (int x, int y)
