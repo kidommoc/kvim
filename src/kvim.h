@@ -14,7 +14,7 @@
 #define STDIN STDIN_FILENO
 #define STDOUT STDOUT_FILENO
 
-/* --- Key --- */
+/* === Key === */
 #define ESC 27
 #define BACKSPACE 127
 #define DEL 28
@@ -45,6 +45,7 @@ typedef struct Row
  * rows: the content of this doc
  * len: the length of the rows
  * crow, ccol: the position of the cursor in this doc
+ * filename: the filename of this doc
  * fd: the file descriptor of this doc
  * modified: indicates whether this doc is modified but not saved
  */
@@ -67,6 +68,7 @@ typedef struct Doc
  * cols, rows: the size of the tty
  * cx, cy: the position of the cursor on the screen
  * mode: indicates the mode of the editor
+ * termIn, termOut: the origin status of STDIN and STDOUT
  */
 struct Kvim
 {
@@ -74,23 +76,19 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
-	char *status;
 	Doc *doc;
 } kvim;
 
 /* === Declaration === */
 
-/* --- display.c --- */
 #define TABSTOP 4
-int updateRender (Row *row);
-int updateScreen (Doc *doc);
-
 /* --- doc.c --- */
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
 int rowsInsert (Doc *doc, Row *rows, int at, int len);
 int rowsDelete (Doc *doc, int from, int len);
+int updateRender (Row *row);
 
 /* --- fileio.c --- */
 int docOpen (Doc *doc, char *filename);
@@ -104,5 +102,7 @@ int handleKey (void);
 int termInit (void);
 int cursorMove (int x, int y);
 int getKey (void);
+int printContent (Doc *doc);
+int printStatus (char *buf, int len);
 
 #endif /* KVIM_H */

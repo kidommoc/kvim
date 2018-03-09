@@ -129,3 +129,15 @@ int getKey (void)
 		}
 	}
 }
+
+/* printContent: print the content of <doc>
+ */
+int printContent (Doc *doc)
+{
+}
+
+/* printStatus: print the status info in <buf>
+ */
+int printStatus (char *buf, int len)
+{
+}
