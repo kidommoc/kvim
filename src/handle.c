@@ -210,6 +210,157 @@ int cursorDown (Doc *doc)
 	}
 }
 
+/* handleCommand: handle kvim-shell command
+ */
+int handleCommand (void)
+{
+	char c, *buf = malloc (kvim.cols);
+	buf[0] = ':';
+	int len = 1, pos = 2;
+	printStatus (buf, len);
+	cursorMove (kvim.rows + 1, pos);
+	while ((c = getKey ()) != ENTER)
+	{
+		switch (c)
+		{
+			case ESC:
+				printStatus ("MODE: NORMAL", 12);
+				free (buf);
+				cursorMove (kvim.cx, kvim.cy);
+				return 0;
+				break;
+			case DEL:
+				if (len == 1)
+				{
+					printStatus ("MODE: NORMAL", 12);
+					free (buf);
+					cursorMove (kvim.cx, kvim.cy);
+					return 0;
+				}
+				if (pos > len)
+					break;
+				if (pos < len)
+					memmove (&buf[pos - 1], &buf[pos], len - pos + 1);
+				--len;
+				printStatus (buf, len);
+				break;
+			case BACKSPACE:
+				if (len == 1)
+				{
+					printStatus ("MODE: NORMAL", 12);
+					free (buf);
+					cursorMove (kvim.cx, kvim.cy);
+					return 0;
+				}
+				if (pos > 2)
+				{
+					if (pos <= len)
+						memmove (&buf[pos - 2], &buf[pos - 1], len - pos + 1);
+					--len;
+					--pos;
+					printStatus (buf, len);
+				}
+				break;
+			case ARROWUP:
+			case ARROWDOWN:
+				break;
+			case ARROWRIGHT:
+				if (pos < len + 1)
+					++pos;
+				break;
+			case ARROWLEFT:
+				if (pos > 2)
+					--pos;
+				break;
+			case TAB:
+				break;
+			default:
+				if (len >= kvim.cols)
+					break;
+				if (pos <= len)
+					memmove (&buf[pos], &buf[pos - 1], len - pos + 1);
+				buf[pos - 1] = c;
+				++pos;
+				++len;
+				printStatus (buf, len);
+				break;
+		}
+		cursorMove (kvim.rows + 1, pos);
+	}
+
+	int i;
+	/* initialize command list
+	 */
+	for (i = 0; i < COMMANDNUM; ++i)
+		commandList[i] = 0;
+	for (i = 1; i < len && buf[i] != ' '; ++i)
+	{
+		if (buf[i] == 'w')
+			commandList[SAVE] = 1;
+		if (buf[i] == 'q')
+			commandList[QUIT] = 1;
+		if (buf[i] == '!')
+			commandList[FORCE] = 1;
+	}
+
+	if (commandList[SAVE])
+	{
+		/* save as ...
+		 */
+		if (i < len)
+		{
+			char *filename = malloc (kvim.cols);
+			int fnlen = 0;
+			while (buf[i] == ' ')
+				++i;
+			for ( ; i < len && buf[i] != ' '; ++i)
+				filename[fnlen++] = buf[i];
+			filename[fnlen] = '\0';
+			docClose (kvim.doc);
+			free (kvim.doc->filename);
+			kvim.doc->filename = filename;
+			kvim.doc->fnlen = fnlen;
+			kvim.doc->fd = open (kvim.doc->filename, O_RDWR|O_CREAT);
+		}
+
+		docSave (kvim.doc);
+		free (buf);
+		buf = malloc (kvim.cols);
+		len = kvim.doc->fnlen + 8;
+		memcpy (buf, "\"", 1);
+		memcpy (buf + 1, kvim.doc->filename, kvim.doc->fnlen);
+		memcpy (buf + kvim.doc->fnlen + 1, "\" saved", 7);
+		printStatus (buf, len);
+		cursorMove (kvim.doc->crow, kvim.doc->ccol);
+	}
+
+	if (commandList[QUIT])
+	{
+		if (kvim.doc->modified)
+		{
+			if (commandList[FORCE])
+			{
+				free (buf);
+				return 2;
+			}
+			else
+			{
+				write (STDOUT, "\x1b[7;91m", 7);
+				printStatus ("Warning: modified without saving. (add ! to quit anyway)", 56);
+				write (STDOUT, "\x1b[0m", 4);
+				cursorMove (kvim.doc->crow, kvim.doc->ccol);
+			}
+		}
+		else
+		{
+			free (buf);
+			return 2;
+		}
+	}
+
+	free (buf);
+}
+
 /* handleNormal: handle key <c> in normal mode
  */
 int handleNormal (char c)
@@ -235,6 +386,7 @@ int handleNormal (char c)
 			break;
 		case 'i':
 			kvim.mode = MODE_INSERT;
+			printStatus ("MODE: INSERT", 12);
 			doc->crcol = doc->ccol;
 			break;
 		case 'x':
@@ -254,6 +406,11 @@ int handleNormal (char c)
 			kvim.cx = 0;
 			doc->crcol = doc->ccol;
 			kvim.mode = MODE_INSERT;
+			printStatus ("MODE: INSERT", 12);
+			break;
+		case ':':
+			if (handleCommand () == 2)
+				return 2;
 			break;
 		default:
 			break;
@@ -270,6 +427,7 @@ int handleInsert (char c)
 	{
 		case ESC:
 			kvim.mode = MODE_NORMAL;
+			printStatus ("MODE: NORMAL", 12);
 			cursorLeft (doc);
 			break;
 		case BACKSPACE:
@@ -412,12 +570,15 @@ int handleKey (void)
 	switch (kvim.mode)
 	{
 		case MODE_NORMAL:
+			printStatus ("MODE: NORMAL", 12);
 			handleNormal (c);
 			break;
 		case MODE_INSERT:
-			handleInsert (c);
+			printStatus ("MODE: INSERT", 12);
+			if (handleInsert (c) == 2)
+				return 2;
 			break;
 		default:
-			return 1;
+			return 0;
 	}
 }

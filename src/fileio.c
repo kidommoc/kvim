@@ -5,7 +5,12 @@
  */
 int docOpen (Doc* doc, char *filename)
 {
-	doc->filename = filename;
+	int fnlen = 0;
+	for (int i = 0; filename[i] != '\0'; ++i, ++fnlen)
+		;
+	doc->fnlen = fnlen;
+	doc->filename = malloc (fnlen);
+	memcpy (doc->filename, filename, fnlen);
 	doc->fd = open (filename, O_RDWR|O_CREAT);
 	char buffer;
 	Row *row = newRow ();

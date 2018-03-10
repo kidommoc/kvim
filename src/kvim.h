@@ -25,6 +25,13 @@
 #define ARROWRIGHT 13
 #define ARROWLEFT 14
 
+/* === Command === */
+#define COMMANDNUM 3
+#define FORCE 0
+#define QUIT 1
+#define SAVE 2
+int commandList[COMMANDNUM];
+
 /* === Struct === */
 
 /* Row: represent a row in the doc
@@ -46,6 +53,7 @@ typedef struct Row
  * len: the length of the rows
  * crow, ccol: the position of the cursor in this doc
  * filename: the filename of this doc
+ * fnlen: the length of filename
  * fd: the file descriptor of this doc
  * modified: indicates whether this doc is modified but not saved
  */
@@ -55,6 +63,7 @@ typedef struct Doc
 	int crow, ccol, crcol;
 	int fd;
 	int modified;
+	int fnlen;
 	char *filename;
 	Row *rows;
 } Doc;

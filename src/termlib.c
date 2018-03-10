@@ -150,4 +150,7 @@ int printContent (Doc *doc)
  */
 int printStatus (char *buf, int len)
 {
+	cursorMove (kvim.rows + 1, 1);
+	write (STDOUT, buf, len);
+	return 0;
 }
