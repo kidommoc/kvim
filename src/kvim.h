@@ -52,6 +52,7 @@ typedef struct Row
  * rows: the content of this doc
  * len: the length of the rows
  * crow, ccol: the position of the cursor in this doc
+ * crcol: the column where the cursor *should* be in this rendered row
  * filename: the filename of this doc
  * fnlen: the length of filename
  * fd: the file descriptor of this doc
@@ -78,6 +79,8 @@ typedef struct Doc
  * cx, cy: the position of the cursor on the screen
  * mode: indicates the mode of the editor
  * termIn, termOut: the origin status of STDIN and STDOUT
+ * status: status info
+ * stlen: the length of status info
  */
 struct Kvim
 {
@@ -85,6 +88,8 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
+	int stlen;
+	char *status;
 	Doc *doc;
 } kvim;
 
@@ -105,6 +110,7 @@ int docSave (Doc *doc);
 int docClose (Doc *doc);
 
 /* --- handle.c --- */
+int setStatus (const char *buf, int len);
 int handleKey (void);
 
 /* --- termlib.c --- */
@@ -113,6 +119,6 @@ int termExit (void);
 int cursorMove (int x, int y);
 int getKey (void);
 int printContent (Doc *doc);
-int printStatus (char *buf, int len);
+int printStatus (const char *buf, int len);
 
 #endif /* KVIM_H */

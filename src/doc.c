@@ -117,9 +117,8 @@ int updateRender (Row *row)
 	for (int i = 0; i < row->len; ++i)
 		if (row->content[i] == '\t')
 			do
-			{
 				++row->rlen;
-			} while (row->rlen % TABSTOP != 0);
+			while (row->rlen % TABSTOP != 0 && row->len % kvim.cols != 0);
 		else
 			++row->rlen;
 	row->render = malloc (row->rlen);

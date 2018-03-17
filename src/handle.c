@@ -14,17 +14,15 @@ int cursorLeft (Doc *doc)
 		for (int i = 0; i <= doc->ccol; ++i)
 			if (doc->rows[doc->crow].content[i] == '\t')
 				do
-				{
 					++l;
-				} while (l % TABSTOP != 0);
+				while (l % TABSTOP != 0 && l % kvim.cols != 0);
 			else
 				++l;
 		int l1 = l;
 		if (doc->rows[doc->crow].content[doc->ccol + 1] == '\t')
 			do
-			{
 				++l1;
-			} while (l1 % TABSTOP != 0);
+			while (l1 % TABSTOP != 0 && l % kvim.cols != 0);
 		else
 			++l1;
 		/* if so, go up
@@ -73,18 +71,16 @@ int cursorRight (Doc *doc)
 		for (int i = 0; i <= doc->ccol; ++i)
 			if (doc->rows[doc->crow].content[i] == '\t')
 				do
-				{
 					++l1;
-				} while (l1 % TABSTOP != 0);
+				while (l1 % TABSTOP != 0 && l % kvim.cols != 0);
 			else
 				++l1;
 		++doc->ccol;
 		int l = l1;
 		if (doc->rows[doc->crow].content[doc->ccol] == '\t')
 			do
-			{
 				++l;
-			} while (l % TABSTOP != 0);
+			while (l % TABSTOP != 0 && l % kvim.cols != 0);
 		else
 			++l;
 		/* if so, go down
@@ -136,17 +132,12 @@ int cursorUp (Doc *doc)
 			for (doc->ccol = 0;
 				doc->ccol < doc->rows[doc->crow].len && l < doc->crcol;
 				++doc->ccol)
-			{
 				if (doc->rows[doc->crow].content[doc->ccol] == '\t')
-				{
 					do
-					{
 						++l;
-					} while (l % TABSTOP != 0);
-				}
+					while (l % TABSTOP != 0 && l % kvim.cols != 0);
 				else
 					++l;
-			}
 			kvim.cx = l % kvim.cols;
 		}
 		if (kvim.cy <= 6)
@@ -181,17 +172,12 @@ int cursorDown (Doc *doc)
 			for (doc->ccol = 0;
 				doc->ccol < doc->rows[doc->crow].len && l < doc->crcol;
 				++doc->ccol)
-			{
 				if (doc->rows[doc->crow].content[doc->ccol] == '\t')
-				{
 					do
-					{
 						++l;
-					} while (l % TABSTOP != 0);
-				}
+					while (l % TABSTOP != 0 && l % kvim.cols != 0);
 				else
 					++l;
-			}
 			kvim.cx = l % kvim.cols;
 		}
 		if (kvim.rows - kvim.cy <= 5)
@@ -210,11 +196,24 @@ int cursorDown (Doc *doc)
 	}
 }
 
+int setStatus (const char *buf, int len)
+{
+	if (kvim.status)
+	{
+		free (kvim.status);
+		kvim.stlen = 0;
+	}
+	kvim.status = malloc (len);
+	memcpy (kvim.status, buf, len);
+	kvim.stlen = len;
+	return 0;
+}
+
 /* handleCommand: handle kvim-shell command
  */
 int handleCommand (void)
 {
-	char c, *buf = malloc (kvim.cols);
+	char c, *buf = malloc (kvim.cols - 1);
 	buf[0] = ':';
 	int len = 1, pos = 2;
 	printStatus (buf, len);
@@ -224,17 +223,15 @@ int handleCommand (void)
 		switch (c)
 		{
 			case ESC:
-				printStatus ("MODE: NORMAL", 12);
+				setStatus ("MODE: NORMAL", 12);
 				free (buf);
-				cursorMove (kvim.cx, kvim.cy);
 				return 0;
 				break;
 			case DEL:
 				if (len == 1)
 				{
-					printStatus ("MODE: NORMAL", 12);
+					setStatus ("MODE: NORMAL", 12);
 					free (buf);
-					cursorMove (kvim.cx, kvim.cy);
 					return 0;
 				}
 				if (pos > len)
@@ -247,9 +244,8 @@ int handleCommand (void)
 			case BACKSPACE:
 				if (len == 1)
 				{
-					printStatus ("MODE: NORMAL", 12);
+					setStatus ("MODE: NORMAL", 12);
 					free (buf);
-					cursorMove (kvim.cx, kvim.cy);
 					return 0;
 				}
 				if (pos > 2)
@@ -275,7 +271,7 @@ int handleCommand (void)
 			case TAB:
 				break;
 			default:
-				if (len >= kvim.cols)
+				if (len >= kvim.cols - 1)
 					break;
 				if (pos <= len)
 					memmove (&buf[pos], &buf[pos - 1], len - pos + 1);
@@ -324,14 +320,15 @@ int handleCommand (void)
 		}
 
 		docSave (kvim.doc);
-		free (buf);
-		buf = malloc (kvim.cols);
-		len = kvim.doc->fnlen + 8;
-		memcpy (buf, "\"", 1);
-		memcpy (buf + 1, kvim.doc->filename, kvim.doc->fnlen);
-		memcpy (buf + kvim.doc->fnlen + 1, "\" saved", 7);
-		printStatus (buf, len);
-		cursorMove (kvim.doc->crow, kvim.doc->ccol);
+		/* set saved status
+		 */
+		if (kvim.status)
+			free (kvim.status);
+		kvim.status = malloc (kvim.cols - 1);
+		kvim.stlen = kvim.doc->fnlen + 8;
+		memcpy (kvim.status, "\"", 1);
+		memcpy (kvim.status + 1, kvim.doc->filename, kvim.doc->fnlen);
+		memcpy (kvim.status + kvim.doc->fnlen + 1, "\" saved", 7);
 	}
 
 	if (commandList[QUIT])
@@ -344,12 +341,7 @@ int handleCommand (void)
 				return 2;
 			}
 			else
-			{
-				write (STDOUT, "\x1b[7;91m", 7);
-				printStatus ("Warning: modified without saving. (add ! to quit anyway)", 56);
-				write (STDOUT, "\x1b[0m", 4);
-				cursorMove (kvim.doc->crow, kvim.doc->ccol);
-			}
+				setStatus ("\x1b[7;91mWarning: modified without saving. (add ! to quit anyway)\x1b[0m", 67);
 		}
 		else
 		{
@@ -359,6 +351,7 @@ int handleCommand (void)
 	}
 
 	free (buf);
+	return 0;
 }
 
 /* handleNormal: handle key <c> in normal mode
@@ -386,7 +379,7 @@ int handleNormal (char c)
 			break;
 		case 'i':
 			kvim.mode = MODE_INSERT;
-			printStatus ("MODE: INSERT", 12);
+			setStatus ("MODE: INSERT", 12);
 			doc->crcol = doc->ccol;
 			break;
 		case 'x':
@@ -406,7 +399,12 @@ int handleNormal (char c)
 			kvim.cx = 0;
 			doc->crcol = doc->ccol;
 			kvim.mode = MODE_INSERT;
-			printStatus ("MODE: INSERT", 12);
+			if (kvim.status)
+			{
+				free (kvim.status);
+				kvim.stlen = 0;
+			}
+			setStatus ("MODE: INSERT", 12);
 			break;
 		case ':':
 			if (handleCommand () == 2)
@@ -427,7 +425,7 @@ int handleInsert (char c)
 	{
 		case ESC:
 			kvim.mode = MODE_NORMAL;
-			printStatus ("MODE: NORMAL", 12);
+			setStatus ("MODE: NORMAL", 12);
 			cursorLeft (doc);
 			break;
 		case BACKSPACE:
@@ -456,27 +454,22 @@ int handleInsert (char c)
 			updateRender (&doc->rows[doc->crow]);
 			doc->modified = 1;
 			++doc->ccol;
-			int delta = 0;
 			do
-			{
 				++doc->crcol;
-				++delta;
-			} while (doc->crcol % 4 != 0);
+			while (doc->crcol % 4 != 0);
 			for (int i = 0; i <= doc->ccol; ++i)
 				if (doc->rows[doc->crow].content[i] == '\t')
 					do
-					{
 						++l1;
-					} while (l1 % TABSTOP != 0);
+					while (l1 % TABSTOP != 0);
 				else
 					++l1;
 			++doc->ccol;
 			l = l1;
 			if (doc->rows[doc->crow].content[doc->ccol] == '\t')
 				do
-				{
 					++l;
-				} while (l % TABSTOP != 0);
+				while (l % TABSTOP != 0);
 			else
 				++l;
 			if (l / kvim.cols - l1 / kvim.cols > 0)
@@ -523,18 +516,16 @@ int handleInsert (char c)
 			for (int i = 0; i <= doc->ccol; ++i)
 				if (doc->rows[doc->crow].content[i] == '\t')
 					do
-					{
 						++l1;
-					} while (l1 % TABSTOP != 0);
+					while (l1 % TABSTOP != 0);
 				else
 					++l1;
 			++doc->ccol;
 			l = l1;
 			if (doc->rows[doc->crow].content[doc->ccol] == '\t')
 				do
-				{
 					++l;
-				} while (l % TABSTOP != 0);
+				while (l % TABSTOP != 0);
 			else
 				++l;
 			if (l / kvim.cols - l1 / kvim.cols > 0)
@@ -570,11 +561,11 @@ int handleKey (void)
 	switch (kvim.mode)
 	{
 		case MODE_NORMAL:
-			printStatus ("MODE: NORMAL", 12);
+			setStatus ("MODE: NORMAL", 12);
 			handleNormal (c);
 			break;
 		case MODE_INSERT:
-			printStatus ("MODE: INSERT", 12);
+			setStatus ("MODE: INSERT", 12);
 			if (handleInsert (c) == 2)
 				return 2;
 			break;
