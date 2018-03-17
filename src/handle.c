@@ -72,7 +72,7 @@ int cursorRight (Doc *doc)
 			if (doc->rows[doc->crow].content[i] == '\t')
 				do
 					++l1;
-				while (l1 % TABSTOP != 0 && l % kvim.cols != 0);
+				while (l1 % TABSTOP != 0 && l1 % kvim.cols != 0);
 			else
 				++l1;
 		++doc->ccol;
