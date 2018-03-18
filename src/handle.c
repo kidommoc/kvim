@@ -124,7 +124,7 @@ int cursorUp (Doc *doc)
 		int l = 0;
 		if (doc->rows[doc->crow].len == 0)
 		{
-			kvim.cx = 0;
+			kvim.cx = 1;
 			doc->ccol = 0;
 		}
 		else
@@ -138,7 +138,7 @@ int cursorUp (Doc *doc)
 					while (l % TABSTOP != 0 && l % kvim.cols != 0);
 				else
 					++l;
-			kvim.cx = l % kvim.cols;
+			kvim.cx = l % kvim.cols + 1;
 		}
 		if (kvim.cy <= 6)
 		{
@@ -178,7 +178,7 @@ int cursorDown (Doc *doc)
 					while (l % TABSTOP != 0 && l % kvim.cols != 0);
 				else
 					++l;
-			kvim.cx = l % kvim.cols;
+			kvim.cx = l % kvim.cols + 1;
 		}
 		if (kvim.rows - kvim.cy <= 5)
 		{
@@ -562,12 +562,12 @@ int handleKey (void)
 	{
 		case MODE_NORMAL:
 			setStatus ("MODE: NORMAL", 12);
-			handleNormal (c);
+			if (handleNormal (c) == 2)
+				return 2;
 			break;
 		case MODE_INSERT:
 			setStatus ("MODE: INSERT", 12);
-			if (handleInsert (c) == 2)
-				return 2;
+			handleInsert (c);
 			break;
 		default:
 			return 0;
