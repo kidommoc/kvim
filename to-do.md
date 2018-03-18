@@ -4,6 +4,10 @@
 - operation: h j k l i x o esc
 - command: w q !
 
+# v 1.0.1
+
+- store rows as pointers in a doc
+
 # v 1.1
 
 - display line num
