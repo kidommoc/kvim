@@ -439,6 +439,7 @@ int handleInsert (char c)
 					cursorRight (doc);
 			}
 			handleInsert (DEL);
+			doc->modified = 1;
 			break;
 		case DEL:
 			if (doc->ccol < doc->rows[doc->crow].len)
@@ -460,7 +461,6 @@ int handleInsert (char c)
 		case TAB:
 			charsInsert (&doc->rows[doc->crow], &c, doc->ccol, 1);
 			updateRender (&doc->rows[doc->crow]);
-			doc->modified = 1;
 			++doc->ccol;
 			do
 				++doc->crcol;
@@ -502,6 +502,7 @@ int handleInsert (char c)
 				kvim.cx = l % kvim.cols;
 			}
 			doc->crcol = doc->ccol;
+			doc->modified = 1;
 			break;
 		case ENTER:
 			rowsInsert (doc, newRow (), doc->crow + 1, 1);
@@ -509,17 +510,16 @@ int handleInsert (char c)
 			charsDelete (&doc->rows[doc->crow], doc->ccol, doc->rows[doc->crow].len - doc->ccol);
 			updateRender (&doc->rows[doc->crow]);
 			updateRender (&doc->rows[doc->crow + 1]);
-			doc->modified = 1;
 			cursorDown (doc);
 			doc->ccol = 0;
 			kvim.cx = 1;
 			doc->crcol = doc->ccol;
+			doc->modified = 1;
 			break;
 		default:
 			charsInsert (&doc->rows[doc->crow], &c, doc->ccol, 1);
 			updateRender (&doc->rows[doc->crow]);
 			doc->crcol = doc->ccol;
-			doc->modified = 1;
 			l1 = 0;
 			for (int i = 0; i <= doc->ccol; ++i)
 				if (doc->rows[doc->crow].content[i] == '\t')
@@ -557,6 +557,7 @@ int handleInsert (char c)
 			{
 				kvim.cx = l % kvim.cols;
 			}
+			doc->modified = 1;
 			break;
 	}
 }
