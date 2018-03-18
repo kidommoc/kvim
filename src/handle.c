@@ -506,13 +506,17 @@ int handleInsert (char c)
 			break;
 		case ENTER:
 			rowsInsert (doc, newRow (), doc->crow + 1, 1);
-			charsInsert (&doc->rows[doc->crow + 1], doc->rows[doc->crow].content + doc->ccol, 0, doc->rows[doc->crow].len - doc->ccol);
-			charsDelete (&doc->rows[doc->crow], doc->ccol, doc->rows[doc->crow].len - doc->ccol);
+			charsInsert (&doc->rows[doc->crow + 1],
+				doc->rows[doc->crow].content + doc->ccol,
+				0, doc->rows[doc->crow].len - doc->ccol);
+			charsDelete (&doc->rows[doc->crow], doc->ccol,
+				doc->rows[doc->crow].len - doc->ccol);
 			updateRender (&doc->rows[doc->crow]);
 			updateRender (&doc->rows[doc->crow + 1]);
+			l = doc->ccol;
+			for (int i = 0; i < l - 1; ++i)
+				cursorLeft (doc);
 			cursorDown (doc);
-			doc->ccol = 0;
-			kvim.cx = 1;
 			doc->crcol = doc->ccol;
 			doc->modified = 1;
 			break;
