@@ -140,6 +140,13 @@ int getKey (void)
 	}
 }
 
+int appendBuf (char *buf, int *bflen, const char *from, int len)
+{
+	memcpy (buf + *bflen, from, len);
+	*bflen += len;
+	return 0;
+}
+
 /* printContent: print the content of <doc>
  */
 int printContent (Doc *doc)
