@@ -429,7 +429,15 @@ int handleInsert (char c)
 			cursorLeft (doc);
 			break;
 		case BACKSPACE:
-			cursorLeft (doc);
+			if (doc->ccol > 0)
+				cursorLeft (doc);
+			else if (doc->crow > 0)
+			{
+				cursorUp (doc);
+				--doc.crow;
+				for (int i = 0; i < doc->rows[doc.crow].len - 1; ++i)
+					cursorRight (doc);
+			}
 			handleInsert (DEL);
 			break;
 		case DEL:
