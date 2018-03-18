@@ -434,8 +434,8 @@ int handleInsert (char c)
 			else if (doc->crow > 0)
 			{
 				cursorUp (doc);
-				--doc.crow;
-				for (int i = 0; i < doc->rows[doc.crow].len - 1; ++i)
+				--doc->crow;
+				for (int i = 0; i < doc->rows[doc->crow].len - 1; ++i)
 					cursorRight (doc);
 			}
 			handleInsert (DEL);
@@ -461,47 +461,7 @@ int handleInsert (char c)
 		case TAB:
 			charsInsert (&doc->rows[doc->crow], &c, doc->ccol, 1);
 			updateRender (&doc->rows[doc->crow]);
-			++doc->ccol;
-			do
-				++doc->crcol;
-			while (doc->crcol % 4 != 0);
-			for (int i = 0; i <= doc->ccol; ++i)
-				if (doc->rows[doc->crow].content[i] == '\t')
-					do
-						++l1;
-					while (l1 % TABSTOP != 0);
-				else
-					++l1;
-			++doc->ccol;
-			l = l1;
-			if (doc->rows[doc->crow].content[doc->ccol] == '\t')
-				do
-					++l;
-				while (l % TABSTOP != 0);
-			else
-				++l;
-			if (l / kvim.cols - l1 / kvim.cols > 0)
-			{
-				kvim.cx = 1;
-				if (kvim.cols - kvim.cy <= 5)
-				{
-					int behind = (MIN (l, doc->rows[doc->crow].rlen)
-						- 1) / kvim.cols;
-					for (int i = doc->crow && behind < 6; i < doc->len; ++i)
-						behind += doc->rows[i].rlen / kvim.cols + 1;
-					if (behind > 5)
-						kvim.cy = kvim.cols - 5;
-					else
-						kvim.cy = kvim.cols - behind;
-				}
-				else
-					++kvim.cy;
-			}
-			else
-			{
-				kvim.cx = l % kvim.cols;
-			}
-			doc->crcol = doc->ccol;
+			cursorRight (doc); /* need test */
 			doc->modified = 1;
 			break;
 		case ENTER:
@@ -523,44 +483,7 @@ int handleInsert (char c)
 		default:
 			charsInsert (&doc->rows[doc->crow], &c, doc->ccol, 1);
 			updateRender (&doc->rows[doc->crow]);
-			doc->crcol = doc->ccol;
-			l1 = 0;
-			for (int i = 0; i <= doc->ccol; ++i)
-				if (doc->rows[doc->crow].content[i] == '\t')
-					do
-						++l1;
-					while (l1 % TABSTOP != 0);
-				else
-					++l1;
-			++doc->ccol;
-			l = l1;
-			if (doc->rows[doc->crow].content[doc->ccol] == '\t')
-				do
-					++l;
-				while (l % TABSTOP != 0);
-			else
-				++l;
-			if (l / kvim.cols - l1 / kvim.cols > 0)
-			{
-				kvim.cx = 1;
-				if (kvim.cols - kvim.cy <= 5)
-				{
-					int behind = (MIN (l, doc->rows[doc->crow].rlen)
-						- 1) / kvim.cols;
-					for (int i = doc->crow && behind < 6; i < doc->len; ++i)
-						behind += doc->rows[i].rlen / kvim.cols + 1;
-					if (behind > 5)
-						kvim.cy = kvim.cols - 5;
-					else
-						kvim.cy = kvim.cols - behind;
-				}
-				else
-					++kvim.cy;
-			}
-			else
-			{
-				kvim.cx = l % kvim.cols;
-			}
+			cursorRight (doc);
 			doc->modified = 1;
 			break;
 	}
