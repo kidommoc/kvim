@@ -393,18 +393,14 @@ int handleNormal (char c)
 			break;
 		case 'o':
 			rowsInsert (doc, newRow (), doc->crow + 1, 1);
-			doc->modified = 1;
+			l = doc->ccol;
+			for (int i = 0; i < l - 1; ++i)
+				cursorLeft (doc);
 			cursorDown (doc);
-			doc->ccol = 0;
-			kvim.cx = 0;
 			doc->crcol = doc->ccol;
 			kvim.mode = MODE_INSERT;
-			if (kvim.status)
-			{
-				free (kvim.status);
-				kvim.stlen = 0;
-			}
 			setStatus ("MODE: INSERT", 12);
+			doc->modified = 1;
 			break;
 		case ':':
 			if (handleCommand () == 2)
