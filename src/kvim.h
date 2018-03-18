@@ -105,7 +105,7 @@ int rowsDelete (Doc *doc, int from, int len);
 int updateRender (Row *row);
 
 /* --- fileio.c --- */
-int docOpen (Doc *doc, char *filename);
+Doc* docOpen (char *filename);
 int docSave (Doc *doc);
 int docClose (Doc *doc);
 

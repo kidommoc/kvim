@@ -3,8 +3,15 @@
 
 /* docOpen: open <filename> and store in <doc>
  */
-int docOpen (Doc* doc, char *filename)
+Doc* docOpen (char *filename)
 {
+	Doc *doc = malloc (sizeof (Doc));
+	doc->rows = NULL;
+	doc->len = 0;
+	doc->crow = 0;
+	doc->ccol = 0;
+	doc->crcol = doc->ccol;
+	doc->modified = 0;
 	int fnlen = 0;
 	for (int i = 0; filename[i] != '\0'; ++i, ++fnlen)
 		;
@@ -37,7 +44,7 @@ int docOpen (Doc* doc, char *filename)
 		rowsInsert (doc, row, doc->len, 1);
 	}
 
-	return 0;
+	return doc;
 }
 
 /* docSave: save <doc>
