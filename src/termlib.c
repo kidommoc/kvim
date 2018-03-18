@@ -44,15 +44,15 @@ int termInit (void)
  */
 int termExit (void)
 {
-	tcsetattr (STDIN, TCSADRAIN, &kvim.termIn);
-	tcsetattr (STDOUT, TCSADRAIN, &kvim.termOut);
+	tcsetattr (STDIN, TCSANOW, &kvim.termIn);
+	tcsetattr (STDOUT, TCSANOW, &kvim.termOut);
 	write (STDOUT, "\x1b[2J\x1b[H", 7);
 	return 0;
 }
 
 /* cursorMove: move cursor to <x>, <y>
  */
-int cursorMove (int x, int y)
+int cursorMove (int y, int x)
 {
 	if (x <= 0 || x > kvim.cols || y <= 0 || y > kvim.rows)
 		return 1;
@@ -155,7 +155,7 @@ int printContent (Doc *doc)
 
 /* printStatus: print the status info in <buf>
  */
-int printStatus (char *buf, int len)
+int printStatus (const char *buf, int len)
 {
 	cursorMove (kvim.rows + 1, 1);
 	write (STDOUT, buf, len);
