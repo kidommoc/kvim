@@ -19,6 +19,8 @@ int getContentCol (const Row *row, int rcol)
  */
 int getRenderCol (const Row *row, int col)
 {
+	if (row->len == 0)
+		return 0;
 	int l = 0;
 	for (int i = 0; i <= col; ++i)
 		if (row->content[i] == '\t')
