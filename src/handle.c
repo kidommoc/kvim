@@ -400,7 +400,7 @@ int handleInsert (char c)
 			else if (doc->crow > 0)
 			{
 				cursorUp (doc);
-				for (int i = 0; i < doc->rows[doc->crow].len - 1; ++i)
+				for (int i = 0; i < doc->rows[doc->crow].len; ++i)
 					cursorRight (doc);
 			}
 			handleInsert (DEL);
