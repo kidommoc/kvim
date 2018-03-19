@@ -120,7 +120,7 @@ int cursorUp (Doc *doc)
 			if (before >= 5)
 				kvim.cy = 6;
 			else
-				kvim.cy = before;
+				kvim.cy = before + 1;
 		}
 		else
 			--kvim.cy;
