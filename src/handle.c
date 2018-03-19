@@ -309,7 +309,7 @@ int handleCommand (void)
 				return 2;
 			}
 			else
-				setStatus ("\x1b[7;91mWarning: modified without saving. (add ! to quit anyway)\x1b[0m", 67);
+				setStatus ("\x1b[101mWarning: modified without saving. (add ! to quit anyway)\x1b[0m", 66);
 		}
 		else
 		{
