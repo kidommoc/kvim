@@ -16,11 +16,12 @@ int termInit (void)
 	term.c_cc[VTIME] = 1;
 	term.c_cc[VMIN] = 0;
 	tcsetattr (STDIN, TCSADRAIN, &term);
+
 	tcgetattr (STDOUT, &term);
 	memcpy (&kvim.termOut, &term, sizeof (struct termios));
 	/* disable canonical mode of stdout
 	 */
-	term.c_lflag &= ~ICANON;
+	term.c_lflag &= ~(ECHO|ICANON);
 	tcsetattr (STDOUT, TCSADRAIN, &term);
 
 	/* clear the screen
@@ -52,28 +53,15 @@ int termExit (void)
 
 /* cursorMove: move cursor to <x>, <y>
  */
-int cursorMove (int y, int x)
+int cursorMove (int x, int y)
 {
-	if (x <= 0 || x > kvim.cols || y <= 0 || y > kvim.rows)
+	if (x <= 0 || x > kvim.cols || y <= 0 || y > kvim.rows + 1)
 		return 1;
 
 	int len = 2, l = 1, pow = 1;
 	char *s = malloc (2);
 	s[0] = '\x1b';
 	s[1] = '[';
-	/* count the length of x
-	 */
-	for (l = 1; x / (pow *= 10); ++l)
-		;
-	len += l;
-	s = realloc (s, len);
-	/* convert x to chars
-	 */
-	for (int i = 0; i < l; ++i, x %= pow)
-		s[len - l + i] = x / (pow /= 10) + 48;
-	++len;
-	s = realloc (s, len);
-	s[len - 1] = ';';
 	/* count the length of y
 	 */
 	for (l = 1; y / (pow *= 10); ++l)
@@ -84,6 +72,19 @@ int cursorMove (int y, int x)
 	 */
 	for (int i = 0; i < l; ++i, y %= pow)
 		s[len - l + i] = y / (pow /= 10) + 48;
+	++len;
+	s = realloc (s, len);
+	s[len - 1] = ';';
+	/* count the length of x
+	 */
+	for (l = 1; x / (pow *= 10); ++l)
+		;
+	len += l;
+	s = realloc (s, len);
+	/* convert x to chars
+	 */
+	for (int i = 0; i < l; ++i, x %= pow)
+		s[len - l + i] = x / (pow /= 10) + 48;
 	++len;
 	s = realloc (s, len);
 	s[len - 1] = 'H';
@@ -157,7 +158,8 @@ int printContent (Doc *doc)
  */
 int printStatus (const char *buf, int len)
 {
-	cursorMove (kvim.rows + 1, 1);
+	cursorMove (1, kvim.rows + 1);
+	write (STDOUT, "\x1b[2K", 4);
 	write (STDOUT, buf, len);
 	return 0;
 }
