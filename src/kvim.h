@@ -97,6 +97,8 @@ struct Kvim
 
 #define TABSTOP 4
 /* --- doc.c --- */
+int getRenderCol (const Row *row, int col);
+int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);

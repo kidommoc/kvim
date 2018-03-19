@@ -1,5 +1,35 @@
 #include "kvim.h"
 
+/* getContentCol: change rendered column <rcol> to its content column
+ */
+int getContentCol (const Row *row, int rcol)
+{
+	int l = 0, col = 0;
+	for ( ; col < row->len && l < rcol; ++col)
+		if (row->content[col] == '\t')
+			do
+				++l;
+			while (l % TABSTOP != 0 && l % kvim.cols != 0);
+		else
+			++l;
+	return col;
+}
+
+/* getRenderCol: change content column <rcol> to its render column
+ */
+int getRenderCol (const Row *row, int col)
+{
+	int l = 0;
+	for (int i = 0; i <= col; ++i)
+		if (row->content[i] == '\t')
+			do
+				++l;
+			while (l % TABSTOP != 0 && l % kvim.cols != 0);
+		else
+			++l;
+	return l;
+}
+
 /* charsInsert: insert <len> chars <chars> at <at>
  */
 int charsInsert (Row *row, char *chars, int at, int len)
