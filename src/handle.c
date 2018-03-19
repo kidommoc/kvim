@@ -50,7 +50,7 @@ int cursorRight (Doc *doc)
 	/* only if not at the most right position
 	 * will cursor move right
 	 */
-	if (doc->ccol < doc->rows[doc->crow].len - 1)
+	if (doc->ccol < doc->rows[doc->crow].len)
 	{
 		/* calculate whether cursor will go to the next line
 		 */
@@ -344,7 +344,8 @@ int handleNormal (char c)
 			break;
 		case 'l':
 		case ARROWRIGHT:
-			cursorRight (doc);
+			if (doc->ccol < doc->rows[doc->crow].len - 1)
+				cursorRight (doc);
 			break;
 		case 'i':
 			kvim.mode = MODE_INSERT;
@@ -363,7 +364,7 @@ int handleNormal (char c)
 		case 'o':
 			rowsInsert (doc, newRow (), doc->crow + 1, 1);
 			tmp = doc->ccol;
-			for (int i = 0; i < tmp - 1; ++i)
+			for (int i = 0; i < tmp; ++i)
 				cursorLeft (doc);
 			cursorDown (doc);
 			kvim.mode = MODE_INSERT;
