@@ -109,7 +109,7 @@ int cursorUp (Doc *doc)
 		else
 		{
 			doc->ccol = doc->rows[doc->crow].len - 1;
-			kvim.cx = (doc->rows[doc->crow].rlen - 1) % kvim.cols;
+			kvim.cx = (doc->rows[doc->crow].rlen - 1) % kvim.cols + 1;
 		}
 		if (kvim.cy <= 6)
 		{
@@ -146,7 +146,7 @@ int cursorDown (Doc *doc)
 		else
 		{
 			doc->ccol = doc->rows[doc->crow].len - 1;
-			kvim.cx = (doc->rows[doc->crow].rlen - 1) % kvim.cols;
+			kvim.cx = (doc->rows[doc->crow].rlen - 1) % kvim.cols + 1;
 		}
 		if (kvim.rows - kvim.cy <= 5)
 		{
