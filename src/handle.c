@@ -292,8 +292,8 @@ int handleCommand (void)
 		 */
 		if (kvim.status)
 			free (kvim.status);
-		kvim.status = malloc (kvim.cols - 1);
 		kvim.stlen = kvim.doc->fnlen + 8;
+		kvim.status = malloc (kvim.stlen);
 		memcpy (kvim.status, "\"", 1);
 		memcpy (kvim.status + 1, kvim.doc->filename, kvim.doc->fnlen);
 		memcpy (kvim.status + kvim.doc->fnlen + 1, "\" saved", 7);
