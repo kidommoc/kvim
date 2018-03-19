@@ -89,6 +89,7 @@ int cursorMove (int x, int y)
 	s = realloc (s, len);
 	s[len - 1] = 'H';
 	write (STDOUT, s, len);
+	free (s);
 	return 0;
 }
 
