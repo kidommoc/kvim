@@ -86,9 +86,9 @@ Row* newRow (void)
 	return row;
 }
 
-/* rowsInsert: insert <len> rows <rows> at <at>
+/* rowInsert: insert one row <row> at <at>
  */
-int rowsInsert (Doc *doc, Row *rows, int at, int len)
+int rowInsert (Doc *doc, Row *row, int at)
 {
 	/* if out of range, error
 	 */
@@ -96,45 +96,53 @@ int rowsInsert (Doc *doc, Row *rows, int at, int len)
 		return 1;
 
 	if (doc->rows)
-		doc->rows = realloc (doc->rows, (doc->len + len) * sizeof (Row));
+		doc->rows = realloc (doc->rows, (doc->len + 1) * sizeof (Row*));
 	else
-		doc->rows = malloc ((doc->len + len) * sizeof (Row));
+		doc->rows = malloc ((doc->len + 1) * sizeof (Row*));
 	if (at != doc->len)
-		memmove (doc->rows + at + len, doc->rows + at,
-			(doc->len - at) * sizeof (Row));
-	memcpy (doc->rows + at, rows, len * sizeof (Row));
-	doc->len += len;
+		memmove (doc->rows + at + 1, doc->rows + at,
+			(doc->len - at) * sizeof (Row*));
+	doc->rows[at] = row;
+	++doc->len;
 
 	return 0;
 }
 
-/* rowsDelete: delete <len> rows from <from>
+/* rowDelete: delete <len> rows from <from>
  */
-int rowsDelete (Doc *doc, int from, int len)
+int rowDelete (Doc *doc, int from)
 {
 	/* if out of range, error
 	 */
 	if (from < 0 || from > doc->len)
 		return 1;
 
-	for (int i = from; i < doc->len && i < from + len; ++i)
+	if (doc->rows)
 	{
-		if (doc->rows[i].content)
-			free (doc->rows[i].content);
-		if (doc->rows[i].render)
-			free (doc->rows[i].render);
-		/* this line may cause crash */
-		free (&doc->rows[i]);
-	}
+		if (doc->rows[from]->content)
+			free (doc->rows[from]->content);
+		if (doc->rows[from]->render)
+			free (doc->rows[from]->render);
+		free (doc->rows[from]);
 
-	if (from + len < doc->len)
-	{
-		memmove (doc->rows + from, doc->rows + from + len,
-			(doc->len - from - len) * sizeof (Row));
-		doc->len -= len;
+		Row **tmp = NULL;
+		if (from + 1 < doc->len)
+		{
+			tmp = malloc ((doc->len - 1) * sizeof (Row*));
+			memcpy (tmp, doc->rows, from * sizeof (Row*));
+			memcpy (tmp + from, doc->rows + from + 1,
+				(doc->len - from - 1) * sizeof (Row*));
+			--doc->len;
+		}
+		else
+		{
+			tmp = malloc (from * sizeof (Row*));
+			memcpy (tmp, doc->rows, from * sizeof (Row*));
+			doc->len = from;
+		}
+		free (doc->rows);
+		doc->rows = tmp;
 	}
-	else
-		doc->len = from;
 
 	return 0;
 }

@@ -156,31 +156,31 @@ int printContent (Doc *doc)
 	write (STDOUT, "\x1b[2J\x1b[H", 7);
 	char *buf = malloc (kvim.rows * kvim.cols);
 	int len = 0, before = 0, strow, stcol = 0, left;
-	if (doc->rows[doc->crow].len == 0)
+	if (doc->rows[doc->crow]->len == 0)
 		before = 0;
 	else
-		before = getRenderCol (&doc->rows[doc->crow], doc->ccol) - 1;
+		before = getRenderCol (doc->rows[doc->crow], doc->ccol) - 1;
 	left = kvim.cy - 1 - before / kvim.cols;
 	strow = doc->crow;
 	if (left > 0)
 	{
 		for (--strow; left > 0 && strow >= 0; --strow)
-			left -= doc->rows[strow].rlen / kvim.cols + 1;
+			left -= doc->rows[strow]->rlen / kvim.cols + 1;
 		++strow;
 	}
 	stcol = -left * kvim.cols;
 	left = kvim.rows * kvim.cols;
 	for (int i = strow; i < doc->len && left > 0; ++i)
 	{
-		if (doc->rows[i].rlen - stcol +
-			(doc->rows[i].rlen - doc->rows[i].rlen % kvim.cols) > left)
-			appendBuf (buf, &len, doc->rows[i].render + stcol, left);
+		if (doc->rows[i]->rlen - stcol +
+			(doc->rows[i]->rlen - doc->rows[i]->rlen % kvim.cols) > left)
+			appendBuf (buf, &len, doc->rows[i]->render + stcol, left);
 		else
 		{
 			appendBuf (buf, &len,
-				doc->rows[i].render + stcol, doc->rows[i].rlen - stcol);
+				doc->rows[i]->render + stcol, doc->rows[i]->rlen - stcol);
 			for (int j = 0;
-				j < kvim.cols - doc->rows[i].rlen % kvim.cols; ++j)
+				j < kvim.cols - doc->rows[i]->rlen % kvim.cols; ++j)
 				appendBuf (buf, &len, " ", 1);
 		}
 		left = kvim.rows * kvim.cols - len;

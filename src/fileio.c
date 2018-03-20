@@ -27,8 +27,7 @@ Doc* docOpen (char *filename)
 		if (buffer == '\n')
 		{
 			updateRender (row);
-			rowsInsert (doc, row, doc->len, 1);
-			free (row);
+			rowInsert (doc, row, doc->len);
 			row = newRow ();
 			new = 0;
 		}
@@ -41,7 +40,7 @@ Doc* docOpen (char *filename)
 	if (new)
 	{
 		updateRender (row);
-		rowsInsert (doc, row, doc->len, 1);
+		rowInsert (doc, row, doc->len);
 	}
 
 	return doc;
@@ -57,7 +56,7 @@ int docSave (Doc* doc)
 	lseek (doc->fd, 0, SEEK_SET);
 	for (int i = 0; i < doc->len; ++i)
 	{
-		write (doc->fd, doc->rows[i].content, doc->rows[i].len);
+		write (doc->fd, doc->rows[i]->content, doc->rows[i]->len);
 		write (doc->fd, "\n", 1);
 	}
 	doc->modified = 0;
@@ -72,11 +71,12 @@ int docClose (Doc *doc)
 	close (doc->fd);
 	for (int i = 0; i < doc->len; ++i)
 	{
-		Row *row = &doc->rows[i];
+		Row *row = doc->rows[i];
 		if (row->content)
 			free (row->content);
 		if (row->render)
 			free (row->render);
+		free (row);
 	}
 	free (doc->rows);
 	free (doc);

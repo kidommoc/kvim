@@ -8,16 +8,18 @@ int init (char *filename)
 	kvim.status = NULL;
 	kvim.stlen = 0;
 	kvim.mode = MODE_NORMAL;
-	kvim.doc = docOpen (filename);
+	kvim.doc = malloc (sizeof (Doc*));
+	kvim.doc[0] = docOpen (filename);
 	setStatus ("MODE: NORMAL", 12);
 	return 0;
 }
 
 int quit (void)
 {
-	docClose (kvim.doc);
 	if (kvim.status)
 		free (kvim.status);
+	docClose (kvim.doc[0]);
+	free (kvim.doc);
 	termExit ();
 	write (0, "1\n", 2);
 	return 0;
@@ -47,7 +49,7 @@ int main (int argc, char **argv)
 	 */
 	while (!st)
 	{
-		printContent (kvim.doc);
+		printContent (kvim.doc[0]);
 		printStatus (kvim.status, kvim.stlen);
 		cursorMove (kvim.cx, kvim.cy);
 		st = handleKey ();

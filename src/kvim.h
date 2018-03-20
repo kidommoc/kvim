@@ -66,7 +66,7 @@ typedef struct Doc
 	int modified;
 	int fnlen;
 	char *filename;
-	Row *rows;
+	Row **rows;
 } Doc;
 
 /* --- Editor mode --- */
@@ -90,7 +90,7 @@ struct Kvim
 	struct termios termIn, termOut;
 	int stlen;
 	char *status;
-	Doc *doc;
+	Doc **doc;
 } kvim;
 
 /* === Declaration === */
@@ -102,8 +102,8 @@ int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
-int rowsInsert (Doc *doc, Row *rows, int at, int len);
-int rowsDelete (Doc *doc, int from, int len);
+int rowInsert (Doc *doc, Row *rows, int at);
+int rowDelete (Doc *doc, int from);
 int updateRender (Row *row);
 
 /* --- fileio.c --- */
