@@ -21,7 +21,6 @@ int quit (void)
 	docClose (kvim.doc[0]);
 	free (kvim.doc);
 	termExit ();
-	write (0, "1\n", 2);
 	return 0;
 }
 
