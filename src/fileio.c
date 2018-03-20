@@ -47,7 +47,7 @@ Doc* docOpen (char *filename)
  */
 int docSave (Doc* doc)
 {
-	if (doc->modified == 0)
+	if (!doc->modified)
 		return 0;
 
 	lseek (doc->fd, 0, SEEK_SET);

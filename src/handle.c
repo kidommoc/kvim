@@ -42,7 +42,7 @@ int cursorLeft (Doc *doc)
 	}
 	/* change rendered position
 	 */
-	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
+	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol) - 1;
 }
 
 int cursorRight (Doc *doc)
@@ -87,7 +87,7 @@ int cursorRight (Doc *doc)
 	}
 	/* change rendered position
 	 */
-	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
+	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol) - 1;
 }
 
 int cursorUp (Doc *doc)
@@ -271,18 +271,22 @@ int handleCommand (void)
 		 */
 		if (i < len)
 		{
-			char *filename = malloc (kvim.cols);
 			int fnlen = 0;
 			while (buf[i] == ' ')
 				++i;
+			char *filename = malloc (len - i);
 			for ( ; i < len && buf[i] != ' '; ++i)
 				filename[fnlen++] = buf[i];
 			filename[fnlen] = '\0';
-			docClose (kvim.doc[0]);
+			close (kvim.doc[0]->fd);
 			free (kvim.doc[0]->filename);
 			kvim.doc[0]->filename = filename;
 			kvim.doc[0]->fnlen = fnlen;
 			kvim.doc[0]->fd = open (kvim.doc[0]->filename, O_RDWR|O_CREAT);
+			close (kvim.doc[0]->fd);
+			syscall (SYS_chmod, kvim.doc[0]->filename, 0644);
+			kvim.doc[0]->fd = open (kvim.doc[0]->filename, O_RDWR|O_CREAT);
+			kvim.doc[0]->modified = 1;
 		}
 
 		docSave (kvim.doc[0]);
