@@ -1,1 +1,1 @@
-gcc "main.c" "doc.c" "fileio.c" "termlib.c" "handle.c" -o "kvim"
+gcc "src/main.c" "src/doc.c" "src/fileio.c" "src/termlib.c" "src/handle.c" -o "kvim"
