@@ -21,7 +21,7 @@ int termInit (void)
 	memcpy (&kvim.termOut, &term, sizeof (struct termios));
 	/* disable canonical mode of stdout
 	 */
-	term.c_lflag &= ~(ECHO|ICANON);
+	term.c_lflag &= ~(ECHO|ICANON|ISIG);
 	tcsetattr (STDOUT, TCSADRAIN, &term);
 
 	/* clear the screen
@@ -45,6 +45,8 @@ int termInit (void)
  */
 int termExit (void)
 {
+	kvim.termIn.c_lflag |= ECHO|ICANON|ISIG;
+	kvim.termOut.c_lflag |= ECHO|ICANON|ISIG;
 	tcsetattr (STDIN, TCSANOW, &kvim.termIn);
 	tcsetattr (STDOUT, TCSANOW, &kvim.termOut);
 	write (STDOUT, "\x1b[2J\x1b[H", 7);
