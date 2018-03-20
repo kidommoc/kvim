@@ -153,7 +153,7 @@ int appendBuf (char *buf, int *bflen, const char *from, int len)
  */
 int printContent (Doc *doc)
 {
-	write (STDOUT, "\x1b[2J\x1b[H", 7);
+	write (STDOUT, "\x1b[3J\x1b[H", 7);
 	char *buf = malloc (kvim.rows * kvim.cols);
 	int len = 0, before = 0, strow, stcol = 0, left;
 	if (doc->rows[doc->crow]->len == 0)
