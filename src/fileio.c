@@ -37,11 +37,8 @@ Doc* docOpen (char *filename)
 			new = 1;
 		}
 	}
-	if (new)
-	{
-		updateRender (row);
-		rowInsert (doc, row, doc->len);
-	}
+	updateRender (row);
+	rowInsert (doc, row, doc->len);
 
 	return doc;
 }
