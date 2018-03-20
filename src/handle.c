@@ -392,6 +392,18 @@ int handleInsert (char c)
 			setStatus ("MODE: NORMAL", 12);
 			cursorLeft (doc);
 			break;
+		case ARROWUP:
+			cursorUp (doc);
+			break;
+		case ARROWDOWN:
+			cursorDown (doc);
+			break;
+		case ARROWRIGHT:
+			cursorRight (doc);
+			break;
+		case ARROWLEFT:
+			cursorLeft (doc);
+			break;
 		case BACKSPACE:
 			if (doc->ccol > 0)
 				cursorLeft (doc);
