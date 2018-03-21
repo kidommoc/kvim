@@ -21,7 +21,7 @@ Doc* docOpen (char *filename)
 	doc->fd = open (filename, O_RDWR|O_CREAT);
 	char buffer;
 	Row *row = newRow ();
-	int new = 0;
+	int new = 1;
 	while (read (doc->fd, &buffer, 1) != 0)
 	{
 		if (buffer == '\n')
@@ -37,8 +37,11 @@ Doc* docOpen (char *filename)
 			new = 1;
 		}
 	}
-	updateRender (row);
-	rowInsert (doc, row, doc->len);
+	if (new)
+	{
+		updateRender (row);
+		rowInsert (doc, row, doc->len);
+	}
 
 	return doc;
 }
