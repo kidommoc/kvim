@@ -155,7 +155,7 @@ int appendBuf (char *buf, int *bflen, const char *from, int len)
  */
 int printContent (Doc *doc)
 {
-	write (STDOUT, "\x1b[3J\x1b[H", 7);
+	write (STDOUT, "\x1b[2J\x1b[3J\x1b[H", 11);
 	char *buf = malloc (kvim.rows * kvim.cols);
 	int len = 0, before = 0, strow, stcol = 0, left;
 	if (doc->rows[doc->crow]->len == 0)
@@ -171,21 +171,19 @@ int printContent (Doc *doc)
 		++strow;
 	}
 	stcol = -left * kvim.cols;
-	left = kvim.rows * kvim.cols;
+	left = kvim.rows;
 	for (int i = strow; i < doc->len && left > 0; ++i)
 	{
-		if (doc->rows[i]->rlen - stcol +
-			(doc->rows[i]->rlen - doc->rows[i]->rlen % kvim.cols) > left)
-			appendBuf (buf, &len, doc->rows[i]->render + stcol, left);
+		if (doc->rows[i]->rlen / kvim.cols + 1 > left)
+			appendBuf (buf, &len, doc->rows[i]->render + stcol, left * kvim.cols - stcol);
 		else
 		{
-			appendBuf (buf, &len,
-				doc->rows[i]->render + stcol, doc->rows[i]->rlen - stcol);
-			for (int j = 0;
-				j < kvim.cols - doc->rows[i]->rlen % kvim.cols; ++j)
+			appendBuf (buf, &len, doc->rows[i]->render + stcol, doc->rows[i]->rlen - stcol);
+			for (int j = 0; j < kvim.cols - doc->rows[i]->rlen % kvim.cols; ++j)
 				appendBuf (buf, &len, " ", 1);
 		}
-		left = kvim.rows * kvim.cols - len;
+		//left = kvim.rows * kvim.cols - len;
+		left -= doc->rows[i]->rlen / kvim.cols + 1;
 		if (stcol)
 			stcol = 0;
 	}
