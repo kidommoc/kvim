@@ -161,7 +161,7 @@ int printContent (Doc *doc)
 	if (doc->rows[doc->crow]->len == 0)
 		before = 0;
 	else
-		before = getRenderCol (doc->rows[doc->crow], doc->ccol) - 1;
+		before = getRenderCol (doc->rows[doc->crow], doc->ccol);
 	left = kvim.cy - 1 - before / kvim.cols;
 	strow = doc->crow;
 	if (left > 0)
@@ -182,7 +182,6 @@ int printContent (Doc *doc)
 			for (int j = 0; j < kvim.cols - doc->rows[i]->rlen % kvim.cols; ++j)
 				appendBuf (buf, &len, " ", 1);
 		}
-		//left = kvim.rows * kvim.cols - len;
 		left -= doc->rows[i]->rlen / kvim.cols + 1;
 		if (stcol)
 			stcol = 0;

@@ -38,11 +38,11 @@ int cursorLeft (Doc *doc)
 				--kvim.cy;
 		}
 		else
-			kvim.cx = l % kvim.cols;
+			kvim.cx = l % kvim.cols + 1;
 	}
 	/* change rendered position
 	 */
-	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol) - 1;
+	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 }
 
 int cursorRight (Doc *doc)
@@ -83,17 +83,18 @@ int cursorRight (Doc *doc)
 				++kvim.cy;
 		}
 		else
-			kvim.cx = l % kvim.cols;
+			kvim.cx = l % kvim.cols + 1;
 	}
 	/* change rendered position
 	 */
-	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol) - 1;
+	doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 }
 
 int cursorUp (Doc *doc)
 {
 	if (doc->crow > 0)
 	{
+		kvim.cy -= getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols + 1;
 		--doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
@@ -103,14 +104,15 @@ int cursorUp (Doc *doc)
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
-			kvim.cx = doc->crcol % kvim.cols + 1;
+			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % kvim.cols + 1;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
 			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % kvim.cols + 1;
 		}
-		if (kvim.cy <= 6)
+		kvim.cy -= doc->rows[doc->crow]->rlen / kvim.cols - getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+		if (kvim.cy <= 5)
 		{
 			int before = getRenderCol (doc->rows[doc->crow], doc->ccol)
 				 / kvim.cols;
@@ -121,8 +123,6 @@ int cursorUp (Doc *doc)
 			else
 				kvim.cy = before + 1;
 		}
-		else
-			--kvim.cy;
 	}
 }
 
@@ -130,6 +130,7 @@ int cursorDown (Doc *doc)
 {
 	if (doc->crow < doc->len - 1)
 	{
+		kvim.cy += doc->rows[doc->crow]->rlen / kvim.cols - getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
 		++doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
@@ -139,14 +140,15 @@ int cursorDown (Doc *doc)
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
-			kvim.cx = doc->crcol % kvim.cols + 1;
+			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % kvim.cols + 1;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
 			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % kvim.cols + 1;
 		}
-		if (kvim.rows - kvim.cy <= 5)
+		kvim.cy += getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols + 1;
+		if (kvim.rows - kvim.cy < 5)
 		{
 			int behind = doc->rows[doc->crow]->rlen / kvim.cols -
 				getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
@@ -157,8 +159,6 @@ int cursorDown (Doc *doc)
 			else
 				kvim.cy = kvim.rows - behind;
 		}
-		else
-			++kvim.cy;
 	}
 }
 
