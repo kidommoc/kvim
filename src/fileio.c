@@ -19,6 +19,7 @@ Doc* docOpen (char *filename)
 	doc->filename = malloc (fnlen);
 	memcpy (doc->filename, filename, fnlen);
 	doc->fd = open (filename, O_RDWR|O_CREAT);
+	syscall (SYS_chmod, filename, 0644);
 	char buffer;
 	Row *row = newRow ();
 	int new = 1;

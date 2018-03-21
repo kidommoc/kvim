@@ -283,9 +283,7 @@ int handleCommand (void)
 			kvim.doc[0]->filename = filename;
 			kvim.doc[0]->fnlen = fnlen;
 			kvim.doc[0]->fd = open (kvim.doc[0]->filename, O_RDWR|O_CREAT);
-			close (kvim.doc[0]->fd);
 			syscall (SYS_chmod, kvim.doc[0]->filename, 0644);
-			kvim.doc[0]->fd = open (kvim.doc[0]->filename, O_RDWR|O_CREAT);
 			kvim.doc[0]->modified = 1;
 		}
 
