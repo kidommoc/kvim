@@ -22,14 +22,14 @@ int getRenderCol (const Row *row, int col)
 	if (row->len == 0)
 		return 0;
 	int l = 0;
-	for (int i = 0; i <= col; ++i)
+	for (int i = 0; i <= col && i < row->len; ++i)
 		if (row->content[i] == '\t')
 			do
 				++l;
 			while (l % TABSTOP != 0 && l % kvim.cols != 0);
 		else
 			++l;
-	return l;
+	return l - 1;
 }
 
 /* charsInsert: insert <len> chars <chars> at <at>
