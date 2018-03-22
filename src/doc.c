@@ -21,6 +21,8 @@ int getRenderCol (const Row *row, int col)
 {
 	if (row->len == 0)
 		return 0;
+	if (col == row->len)
+		return row->rlen;
 	int l = 0;
 	for (int i = 0; i <= col && i < row->len; ++i)
 		if (row->content[i] == '\t')
