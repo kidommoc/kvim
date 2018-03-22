@@ -190,9 +190,9 @@ int setStatus (const char *buf, int len)
  */
 int handleCommand (void)
 {
-	char c, *buf = malloc (kvim.cols - 1);
+	char *buf = malloc (kvim.cols - 1);
 	buf[0] = ':';
-	int len = 1, pos = 2;
+	int len = 1, pos = 2, c;
 	printStatus (buf, len);
 	cursorMove (pos, kvim.rows + 1);
 	while ((c = getKey ()) != ENTER)
@@ -334,7 +334,7 @@ int handleCommand (void)
 
 /* handleNormal: handle key <c> in normal mode
  */
-int handleNormal (char c)
+int handleNormal (int c)
 {
 	Doc *doc = kvim.doc[0];
 	int tmp;
@@ -401,7 +401,7 @@ int handleNormal (char c)
 
 /* handleInsert: handle key <c> in insert mode
  */
-int handleInsert (char c)
+int handleInsert (int c)
 {
 	Doc *doc = kvim.doc[0];
 	int tmp;
@@ -455,7 +455,7 @@ int handleInsert (char c)
 			doc->modified = 1;
 			break;
 		case TAB:
-			charsInsert (doc->rows[doc->crow], &c, doc->ccol, 1);
+			charsInsert (doc->rows[doc->crow], (char*)&c, doc->ccol, 1);
 			updateRender (doc->rows[doc->crow]);
 			cursorRight (doc);
 			doc->modified = 1;
@@ -476,7 +476,7 @@ int handleInsert (char c)
 			doc->modified = 1;
 			break;
 		default:
-			charsInsert (doc->rows[doc->crow], &c, doc->ccol, 1);
+			charsInsert (doc->rows[doc->crow], (char*)&c, doc->ccol, 1);
 			updateRender (doc->rows[doc->crow]);
 			cursorRight (doc);
 			doc->modified = 1;
@@ -489,7 +489,7 @@ int handleInsert (char c)
  */
 int handleKey (void)
 {
-	char c = getKey ();
+	int c = getKey ();
 	switch (kvim.mode)
 	{
 		case MODE_NORMAL:

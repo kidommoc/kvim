@@ -15,13 +15,13 @@
 /* === Key === */
 #define ESC 27
 #define BACKSPACE 127
-#define DEL 28
+#define DEL 1000
 #define TAB 9
 #define ENTER 10
-#define ARROWUP 11
-#define ARROWDOWN 12
-#define ARROWRIGHT 13
-#define ARROWLEFT 14
+#define ARROWUP 1001
+#define ARROWDOWN 1002
+#define ARROWRIGHT 1003
+#define ARROWLEFT 1004
 
 /* === Command === */
 #define COMMANDNUM 3
