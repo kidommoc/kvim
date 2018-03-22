@@ -375,6 +375,10 @@ int handleNormal (char c)
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			doc->modified = 1;
 			break;
+		case 's':
+			handleNormal ('x');
+			handleNormal ('i');
+			break;
 		case 'o':
 			rowInsert (doc, newRow (), doc->crow + 1);
 			tmp = doc->ccol;
