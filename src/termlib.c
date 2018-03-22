@@ -60,35 +60,23 @@ int cursorMove (int x, int y)
 	if (x <= 0 || x > kvim.cols || y <= 0 || y > kvim.rows + 1)
 		return 1;
 
-	int len = 2, l = 1, pow = 1;
-	char *s = malloc (2);
+	int len = 2, l;
+	char *s = malloc (2), *tmp;
 	s[0] = '\x1b';
 	s[1] = '[';
-	/* count the length of y
-	 */
-	for (l = 1; y / (pow *= 10); ++l)
-		;
-	len += l;
-	s = realloc (s, len);
 	/* convert y to chars
 	 */
-	for (int i = 0; i < l; ++i, y %= pow)
-		s[len - l + i] = y / (pow /= 10) + 48;
-	++len;
-	s = realloc (s, len);
+	tmp = convertNumToStr (y, &l);
+	s = realloc (s, len + l + 1);
+	memcpy (s + len, tmp, l);
+	len += l + 1;
 	s[len - 1] = ';';
-	/* count the length of x
-	 */
-	for (l = 1; x / (pow *= 10); ++l)
-		;
-	len += l;
-	s = realloc (s, len);
 	/* convert x to chars
 	 */
-	for (int i = 0; i < l; ++i, x %= pow)
-		s[len - l + i] = x / (pow /= 10) + 48;
-	++len;
-	s = realloc (s, len);
+	tmp = convertNumToStr (x, &l);
+	s = realloc (s, len + l + 1);
+	memcpy (s + len, tmp, l);
+	len += l + 1;
 	s[len - 1] = 'H';
 	write (STDOUT, s, len);
 	free (s);

@@ -9,9 +9,6 @@
 #include <sys/ioctl.h>
 #include <sys/syscall.h>
 
-#define MAX(a,b) (a > b ? a : b)
-#define MIN(a,b) (a < b ? a : b)
-
 #define STDIN STDIN_FILENO
 #define STDOUT STDOUT_FILENO
 
@@ -98,8 +95,6 @@ struct Kvim
 
 #define TABSTOP 4
 /* --- doc.c --- */
-int getRenderCol (const Row *row, int col);
-int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
@@ -123,5 +118,13 @@ int cursorMove (int x, int y);
 int getKey (void);
 int printContent (Doc *doc);
 int printStatus (const char *buf, int len);
+
+/* --- utils.c --- */
+#define MAX(a,b) (a > b ? a : b)
+#define MIN(a,b) (a < b ? a : b)
+int getNumLen (int n);
+char* convertNumToStr (int n, int *len);
+int getRenderCol (const Row *row, int col);
+int getContentCol (const Row *row, int rcol);
 
 #endif /* KVIM_H */
