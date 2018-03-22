@@ -169,9 +169,20 @@ int setStatus (const char *buf, int len)
 		free (kvim.status);
 		kvim.stlen = 0;
 	}
-	kvim.status = malloc (len);
-	memcpy (kvim.status, buf, len);
-	kvim.stlen = len;
+	if (len < kvim.cols)
+	{
+		kvim.status = malloc (len);
+		memcpy (kvim.status, buf, len);
+		kvim.stlen = len;
+	}
+	else
+	{
+		kvim.status = malloc (kvim.cols - 1);
+		kvim.status[0] = '<';
+		memcpy (kvim.status + 1, &buf[len - kvim.cols + 1],
+			kvim.cols - 2);
+		kvim.stlen = kvim.cols - 1;
+	}
 	return 0;
 }
 
@@ -290,13 +301,12 @@ int handleCommand (void)
 		docSave (kvim.doc[0]);
 		/* set saved status
 		 */
-		if (kvim.status)
-			free (kvim.status);
-		kvim.stlen = kvim.doc[0]->fnlen + 8;
-		kvim.status = malloc (kvim.stlen);
-		memcpy (kvim.status, "\"", 1);
-		memcpy (kvim.status + 1, kvim.doc[0]->filename, kvim.doc[0]->fnlen);
-		memcpy (kvim.status + kvim.doc[0]->fnlen + 1, "\" saved", 7);
+		char *buf = malloc (kvim.doc[0]->fnlen + 8);
+		buf[0] = '\"';
+		memcpy (buf + 1, kvim.doc[0]->filename, kvim.doc[0]->fnlen);
+		memcpy (buf + 1 + kvim.doc[0]->fnlen,"\" saved", 7);
+		setStatus (buf, kvim.doc[0]->fnlen + 8);
+		free (buf);
 	}
 
 	if (commandList[QUIT])
