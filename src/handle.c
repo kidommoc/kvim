@@ -389,6 +389,16 @@ int handleNormal (int c)
 			setStatus ("MODE: INSERT", 12);
 			doc->modified = 1;
 			break;
+		case 'O':
+			rowInsert (doc, newRow (), doc->crow);
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			kvim.cx = 1;
+			kvim.mode = MODE_INSERT;
+			setStatus ("MODE: INSERT", 12);
+			doc->modified = 1;
+			break;
 		case ':':
 			if (handleCommand () == 2)
 				return 2;
