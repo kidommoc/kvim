@@ -470,7 +470,7 @@ int handleInsert (char c)
 			updateRender (doc->rows[doc->crow]);
 			updateRender (doc->rows[doc->crow + 1]);
 			tmp = doc->ccol;
-			for (int i = 0; i < tmp - 1; ++i)
+			for (int i = 0; i < tmp; ++i)
 				cursorLeft (doc);
 			cursorDown (doc);
 			doc->modified = 1;
