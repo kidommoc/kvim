@@ -7,7 +7,7 @@
 # v 1.1
 
 - display line num
-- operation: \<num\>{hjkl} \<num\>dd a s O w e
+- operation: \<num\>{hjkl} \<num\>dd a s O
 
 # v 1.2
 
@@ -16,40 +16,40 @@
 
 # v 1.3
 
-- clipboard
-- operation: \<num\>yy \<num\>p \<num\>P
+- search and replace
+- operation: \<num\>{fFtT}\<char\> n N r R w e
+- command: \
 
 # v 1.4
 
-- high-light
-- config file support
+- clipboard
+- operation: \<num\>yy \<num\>p \<num\>P
 
 # v 1.5
-
-- search and replace
-- operation: \<num\>{fFtT}\<char\> n N r R
-- command: \
-
-# v 1.6
-
-- fold
-- operation: zc zo zr zm
-
-# v 1.7
 
 - visual mode
 - operation: v
 
+# v 1.6
+
+- visual block mode
+- operation: ^v
+
+# v 1.7
+
+- high-light
+- config file support
+
 # v 1.8
+
+- fold
+- operation: zc zo zr zm zR zM
+
+# v 1.9
 
 - multi-doc
 - operation: ^w{hjkl}
 - command: :split :vsplit
-
-# v 1.9
-
-- visual block mode
-- operation: ^v
 
 # v 2.0
 
