@@ -362,6 +362,10 @@ int handleNormal (char c)
 			setStatus ("MODE: INSERT", 12);
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			break;
+		case 'a':
+			cursorRight (doc);
+			handleNormal ('i');
+			break;
 		case 'x':
 			if (doc->rows[doc->crow]->content != NULL)
 			{
