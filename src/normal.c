@@ -67,6 +67,24 @@ static int move (int c)
 				}
 			}
 			break;
+		case '0':
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			break;
+		case '^':
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			while (doc->rows[doc->crow]->content[doc->ccol] == ' '
+				|| doc->rows[doc->crow]->content[doc->ccol] == TAB)
+				cursorRight (doc);
+			break;
+		case '$':
+			tmp = doc->rows[doc->crow]->len - doc->ccol - 1;
+			for (int i = 0; i < tmp; ++i)
+				cursorRight (doc);
+			break;
 		default:
 			break;
 	}
@@ -179,6 +197,8 @@ int handleNormal (int c)
 		case ARROWRIGHT:
 		case 'g':
 		case 'G':
+		case '^':
+		case '$':
 			move (c);
 			break;
 		case 'i':
@@ -193,6 +213,11 @@ int handleNormal (int c)
 			delete (c);
 			break;
 		case '0':
+			if (kvim.iblen == 0)
+			{
+				move (c);
+				break;
+			}
 		case '1':
 		case '2':
 		case '3':
