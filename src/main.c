@@ -11,6 +11,7 @@ int init (char *filename)
 	kvim.mode = MODE_NORMAL;
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);
+	kvim.cx = kvim.doc[0]->lnlen + 2;
 	setStatus ("MODE: NORMAL", 12);
 	return 0;
 }

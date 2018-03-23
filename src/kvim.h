@@ -33,6 +33,7 @@ int commandList[COMMANDNUM];
 /* === Struct === */
 
 /* Row: represent a row in the doc
+ * ind: the row index in the doc (based on zero)
  * content: the content of this row
  * len: the length of content
  * render: rendered content with tabs handled
@@ -40,6 +41,7 @@ int commandList[COMMANDNUM];
  */
 typedef struct Row
 {
+	int ind;
 	int len;
 	int rlen;
 	char *content;
@@ -49,6 +51,7 @@ typedef struct Row
 /* Doc: represent a document in the editor
  * rows: the content of this doc
  * len: the length of the rows
+ * lnlen: the length of len
  * crow, ccol: the position of the cursor in this doc
  * crcol: the column where the cursor *should* be in this rendered row
  * filename: the filename of this doc
@@ -58,7 +61,7 @@ typedef struct Row
  */
 typedef struct Doc
 {
-	int len;
+	int len, lnlen;
 	int crow, ccol, crcol;
 	int fd;
 	int fnlen;

@@ -47,6 +47,7 @@ int charsDelete (Row *row, int from, int len)
 Row* newRow (void)
 {
 	Row *row = malloc (sizeof (Row));
+	row->ind = 0;
 	row->content = NULL;
 	row->len = 0;
 	row->render = NULL;
@@ -70,8 +71,12 @@ int rowInsert (Doc *doc, Row *row, int at)
 	if (at != doc->len)
 		memmove (doc->rows + at + 1, doc->rows + at,
 			(doc->len - at) * sizeof (Row*));
+	row->ind = at;
 	doc->rows[at] = row;
 	++doc->len;
+	for (int i = at + 1; i < doc->len; ++i)
+		++doc->rows[i]->ind;
+	doc->lnlen = getNumLen (doc->len);
 
 	return 0;
 }
@@ -110,6 +115,9 @@ int rowDelete (Doc *doc, int from)
 		}
 		free (doc->rows);
 		doc->rows = tmp;
+		for (int i = from; i < doc->len; ++i)
+			--doc->rows[i]->ind;
+		doc->lnlen = getNumLen (doc->len);
 	}
 
 	return 0;

@@ -43,6 +43,7 @@ Doc* docOpen (char *filename)
 		updateRender (row);
 		rowInsert (doc, row, doc->len);
 	}
+	doc->lnlen = getNumLen (doc->len);
 
 	return doc;
 }

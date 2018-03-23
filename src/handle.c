@@ -2,6 +2,7 @@
 
 int cursorLeft (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	/* only if not at the most left position
 	 * will cursor move left
 	 */
@@ -14,7 +15,7 @@ int cursorLeft (Doc *doc)
 			l1 = getRenderCol (doc->rows[doc->crow], doc->ccol + 1);
 		/* if so, go up
 		 */
-		if (l1 / kvim.cols - l / kvim.cols > 0)
+		if (l1 / cols - l / cols > 0)
 		{
 			kvim.cx = kvim.cols;
 			/* if reach the top of screen
@@ -24,9 +25,9 @@ int cursorLeft (Doc *doc)
 				/* calculate whether reach the top of the doc
 				 */
 				int before = (MIN (l, doc->rows[doc->crow]->rlen) - 1)
-					/ kvim.cols;
+					/ cols;
 				for (int i = doc->crow - 1 && before < 5; i >= 0; --i)
-					before += doc->rows[i]->rlen / kvim.cols + 1;
+					before += doc->rows[i]->rlen / cols + 1;
 				/* if not so
 				 */
 				if (before > 5)
@@ -38,7 +39,7 @@ int cursorLeft (Doc *doc)
 				--kvim.cy;
 		}
 		else
-			kvim.cx = l % kvim.cols + 1;
+			kvim.cx = l % cols + 2 + doc->lnlen;
 	}
 	/* change rendered position
 	 */
@@ -47,6 +48,7 @@ int cursorLeft (Doc *doc)
 
 int cursorRight (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	/* only if not at the most right position
 	 * will cursor move right
 	 */
@@ -59,31 +61,31 @@ int cursorRight (Doc *doc)
 			l1 = getRenderCol (doc->rows[doc->crow], doc->ccol - 1);
 		/* if so, go down
 		 */
-		if (l / kvim.cols - l1 / kvim.cols > 0)
+		if (l / cols - l1 / cols > 0)
 		{
-			kvim.cx = 1;
+			kvim.cx = doc->lnlen + 2;
 			/* if reach the bottom of screen
 			 */
-			if (kvim.cols - kvim.cy <= 5)
+			if (kvim.rows - kvim.cy <= 5)
 			{
 				/* calculate whether reach the bottom of the doc
 				 */
 				int behind = (MIN (l, doc->rows[doc->crow]->rlen)
-					- 1) / kvim.cols;
+					- 1) / cols;
 				for (int i = doc->crow && behind < 6; i < doc->len; ++i)
-					behind += doc->rows[i]->rlen / kvim.cols + 1;
+					behind += doc->rows[i]->rlen / cols + 1;
 				/* if not so
 				 */
 				if (behind > 5)
-					kvim.cy = kvim.cols - 5;
+					kvim.cy = kvim.rows - 5;
 				else
-					kvim.cy = kvim.cols - behind;
+					kvim.cy = kvim.rows - behind;
 			}
 			else
 				++kvim.cy;
 		}
 		else
-			kvim.cx = l % kvim.cols + 1;
+			kvim.cx = l % cols + 2 + doc->lnlen;
 	}
 	/* change rendered position
 	 */
@@ -92,32 +94,37 @@ int cursorRight (Doc *doc)
 
 int cursorUp (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	if (doc->crow > 0)
 	{
-		kvim.cy -= getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols + 1;
+		kvim.cy -= getRenderCol (doc->rows[doc->crow], doc->ccol)
+			/ cols + 1;
 		--doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
-			kvim.cx = 1;
+			kvim.cx = doc->lnlen + 2;
 			doc->ccol = 0;
 		}
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
-			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % kvim.cols + 1;
+			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % cols
+				+ 2 + doc->lnlen;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
-			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % kvim.cols + 1;
+			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 2
+				+ doc->lnlen;
 		}
-		kvim.cy -= doc->rows[doc->crow]->rlen / kvim.cols - getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+		kvim.cy -= doc->rows[doc->crow]->rlen / cols
+			- getRenderCol (doc->rows[doc->crow], doc->ccol) / cols;
 		if (kvim.cy <= 5)
 		{
 			int before = getRenderCol (doc->rows[doc->crow], doc->ccol)
-				 / kvim.cols;
+				 / cols;
 			for (int i = doc->crow - 1; i >= 0 && before < 5; --i)
-				before += (doc->rows[i]->rlen  - 1) / kvim.cols + 1;
+				before += (doc->rows[i]->rlen  - 1) / cols + 1;
 			if (before >= 5)
 				kvim.cy = 6;
 			else
@@ -128,32 +135,37 @@ int cursorUp (Doc *doc)
 
 int cursorDown (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	if (doc->crow < doc->len - 1)
 	{
-		kvim.cy += doc->rows[doc->crow]->rlen / kvim.cols - getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+		kvim.cy += doc->rows[doc->crow]->rlen / cols
+			- getRenderCol (doc->rows[doc->crow], doc->ccol) / cols;
 		++doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
-			kvim.cx = 1;
+			kvim.cx = doc->lnlen + 2;
 			doc->ccol = 0;
 		}
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
-			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % kvim.cols + 1;
+			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % cols
+				+ 2 + doc->lnlen;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
-			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % kvim.cols + 1;
+			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 2
+				+ doc->lnlen;
 		}
-		kvim.cy += getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols + 1;
+		kvim.cy += getRenderCol (doc->rows[doc->crow], doc->ccol) / cols
+			+ 1;
 		if (kvim.rows - kvim.cy < 5)
 		{
-			int behind = doc->rows[doc->crow]->rlen / kvim.cols -
-				getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+			int behind = doc->rows[doc->crow]->rlen / cols
+				- getRenderCol (doc->rows[doc->crow], doc->ccol) / cols;
 			for (int i = doc->crow + 1; i < doc->len && behind < 5; ++i)
-				behind += (doc->rows[i]->rlen -1 ) / kvim.cols + 1;
+				behind += (doc->rows[i]->rlen - 1) / cols + 1;
 			if (behind >= 5)
 				kvim.cy = kvim.rows - 5;
 			else
