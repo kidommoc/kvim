@@ -175,6 +175,12 @@ int printContent (Doc *doc)
 
 	for (int i = 0; i < kvim.rows; ++i)
 	{
+		if (row >= doc->len)
+		{
+			for (int j = 0; j < kvim.cols; ++j)
+				appendBuf (buf, &len, " ", 1);
+			continue;
+		}
 		if (i == 0 || col == 0)
 		{
 			int l = getNumLen (doc->rows[row]->ind + 1);
