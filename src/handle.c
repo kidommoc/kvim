@@ -429,6 +429,20 @@ int handleNormal (int c)
 			setStatus ("MODE: INSERT", 12);
 			doc->modified = 1;
 			break;
+		case 'd':
+			if (kvim.inputBuf[kvim.iblen - 1] == 'd')
+			{
+				--kvim.iblen;
+				tmp = getIbNum ();
+				for (int i = 0; i < doc->ccol; ++i)
+					cursorLeft (doc);
+				for (int i = 0; i < tmp; ++i)
+					rowDelete (doc, doc->crow);
+			}
+			else
+				appendInputBuf (c);
+			doc->modified = 1;
+			break;
 		case ':':
 			kvim.iblen = 0;
 			if (handleCommand () == 2)
