@@ -7,6 +7,7 @@ int init (char *filename)
 	termInit ();
 	kvim.status = NULL;
 	kvim.stlen = 0;
+	kvim.iblen = 0;
 	kvim.mode = MODE_NORMAL;
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);

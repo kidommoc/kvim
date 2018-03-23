@@ -61,8 +61,8 @@ typedef struct Doc
 	int len;
 	int crow, ccol, crcol;
 	int fd;
-	int modified;
 	int fnlen;
+	int modified;
 	char *filename;
 	Row **rows;
 } Doc;
@@ -79,6 +79,8 @@ typedef struct Doc
  * termIn, termOut: the origin status of STDIN and STDOUT
  * status: status info
  * stlen: the length of status info
+ * inputBuf: input buffer
+ * iblen: the length of input buffer
  */
 struct Kvim
 {
@@ -86,8 +88,9 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
-	int stlen;
+	int stlen, iblen;
 	char *status;
+	int inputBuf[100];
 	Doc **doc;
 } kvim;
 
@@ -124,6 +127,7 @@ int printStatus (const char *buf, int len);
 #define MIN(a,b) (a < b ? a : b)
 int getNumLen (int n);
 char* convertNumToStr (int n, int *len);
+int convertStrToNum (int* s, int len);
 int getRenderCol (const Row *row, int col);
 int getContentCol (const Row *row, int rcol);
 
