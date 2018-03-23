@@ -23,7 +23,9 @@
 #define ARROWDOWN 1002
 #define ARROWRIGHT 1003
 #define ARROWLEFT 1004
+#define CTRL_D 4
 #define CTRL_G 7
+#define CTRL_U 21
 
 /* === Command === */
 #define COMMANDNUM 3

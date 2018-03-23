@@ -2,6 +2,7 @@
 
 static int move (int c)
 {
+	int cols = kvim.cols - kvim.doc[0]->lnlen - 1;
 	Doc *doc = kvim.doc[0];
 	int tmp;
 	switch (c)
@@ -85,6 +86,28 @@ static int move (int c)
 			for (int i = 0; i < tmp; ++i)
 				cursorRight (doc);
 			break;
+		case CTRL_U:
+			for (tmp = 0; tmp < kvim.rows / 2 && doc->crow > 0; )
+			{
+				tmp += (getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
+					/ cols + 1;
+				cursorUp (doc);
+				tmp += (doc->rows[doc->crow]->rlen
+					- getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
+					/ cols;
+			}
+			break;
+		case CTRL_D:
+			for (tmp = 0; tmp < kvim.rows / 2 && doc->crow < doc->len - 1; )
+			{
+				tmp += (doc->rows[doc->crow]->rlen
+					- getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
+					/ cols + 1;
+				cursorDown (doc);
+				tmp += (getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
+					/ cols;
+			}
+			break;
 		default:
 			break;
 	}
@@ -166,10 +189,10 @@ static int delete (int c)
 					cursorLeft (doc);
 				for (int i = 0; i < tmp; ++i)
 					rowDelete (doc, doc->crow);
+				doc->modified = 1;
 			}
 			else
 				appendInputBuf (c);
-			doc->modified = 1;
 			break;
 		default:
 			break;
@@ -224,6 +247,8 @@ int handleNormal (int c)
 		case 'G':
 		case '^':
 		case '$':
+		case CTRL_U:
+		case CTRL_D:
 			move (c);
 			break;
 		case 'i':
