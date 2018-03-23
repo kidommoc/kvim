@@ -176,6 +176,31 @@ static int delete (int c)
 	}
 }
 
+static int displayInfo (void)
+{
+	int l, len = kvim.doc[0]->fnlen + 3;	
+	char *buf = malloc (len), *tmp;
+	buf[0] = '\"';
+	memcpy (buf + 1, kvim.doc[0]->filename, kvim.doc[0]->fnlen);
+	memcpy (buf + len - 2, "\" ", 2);
+	tmp = convertNumToStr (kvim.doc[0]->len, &l);
+	buf = realloc (buf, len + l + 4);
+	memcpy (buf + len, tmp, l);
+	free (tmp);
+	memcpy (buf + len + l, "L --", 4);
+	len += l + 4;
+	tmp = convertNumToStr (
+		MIN (100, kvim.doc[0]->crow * 100 / kvim.doc[0]->len + 1), &l);
+	buf = realloc (buf, len + l + 3);
+	memcpy (buf + len, tmp, l);
+	free (tmp);
+	memcpy (buf + len + l, "%--", 3);
+	len += l + 3;
+	setStatus (buf, len);
+	free (buf);
+	return 0;
+}
+
 /* handleNormal: handle key <c> in normal mode
  */
 int handleNormal (int c)
@@ -233,6 +258,9 @@ int handleNormal (int c)
 				appendInputBuf (c);
 			else
 				kvim.iblen = 0;
+			break;
+		case CTRL_G:
+			displayInfo ();
 			break;
 		case ':':
 			kvim.iblen = 0;
