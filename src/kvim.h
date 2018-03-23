@@ -138,7 +138,7 @@ int termExit (void);
 int cursorMove (int x, int y);
 int getKey (void);
 int printContent (Doc *doc);
-int printStatus (const char *buf, int len);
+int printStatus (char *buf, int len);
 
 /* --- utils.c --- */
 #define MAX(a,b) (a > b ? a : b)
