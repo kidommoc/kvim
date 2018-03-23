@@ -4,7 +4,7 @@ int cursorUp (Doc *doc)
 {
 	/* the width of screen excluding the width of line number
 	 */
-	int cols = kvim.cols - doc->lnlen + 1;
+	int cols = kvim.cols - doc->lnlen - 1;
 	/* if not at the first line
 	 */
 	if (doc->crow > 0)
@@ -36,7 +36,7 @@ int cursorUp (Doc *doc)
 			int before = getRenderCol (doc->rows[doc->crow], doc->ccol)
 				 / cols;
 			for (int i = doc->crow - 1; i >= 0 && before < 5; --i)
-				before += (doc->rows[i]->rlen  - 1) / cols + 1;
+				before += (doc->rows[i]->rlen - 1) / cols + 1;
 			if (before >= 5)
 				kvim.cy = 6;
 			else
@@ -49,7 +49,7 @@ int cursorDown (Doc *doc)
 {
 	/* the width of screen excluding the width of line number
 	 */
-	int cols = kvim.cols - doc->lnlen + 1;
+	int cols = kvim.cols - doc->lnlen - 1;
 	/* if not at the last line
 	 */
 	if (doc->crow < doc->len - 1)
@@ -92,7 +92,7 @@ int cursorDown (Doc *doc)
 
 int cursorRight (Doc *doc)
 {
-	int cols = kvim.cols - doc->lnlen + 1;
+	int cols = kvim.cols - doc->lnlen - 1;
 	/* only if not at the most right position
 	 * will cursor move right
 	 */
@@ -114,13 +114,12 @@ int cursorRight (Doc *doc)
 			{
 				/* calculate whether reach the bottom of the doc
 				 */
-				int behind = (MIN (l, doc->rows[doc->crow]->rlen)
-					- 1) / cols;
-				for (int i = doc->crow && behind < 6; i < doc->len; ++i)
-					behind += doc->rows[i]->rlen / cols + 1;
+				int behind = doc->rows[doc->crow]->rlen / cols - l / cols;
+				for (int i = doc->crow + 1; behind < 5 && i < doc->len; ++i)
+					behind += (doc->rows[i]->rlen - 1) / cols + 1;
 				/* if not so
 				 */
-				if (behind > 5)
+				if (behind >= 5)
 					kvim.cy = kvim.rows - 5;
 				else
 					kvim.cy = kvim.rows - behind;
@@ -138,7 +137,7 @@ int cursorRight (Doc *doc)
 
 int cursorLeft (Doc *doc)
 {
-	int cols = kvim.cols - doc->lnlen + 1;
+	int cols = kvim.cols - doc->lnlen - 1;
 	/* only if not at the most left position
 	 * will cursor move left
 	 */
@@ -160,16 +159,15 @@ int cursorLeft (Doc *doc)
 			{
 				/* calculate whether reach the top of the doc
 				 */
-				int before = (MIN (l, doc->rows[doc->crow]->rlen) - 1)
-					/ cols;
+				int before = MIN (l, doc->rows[doc->crow]->rlen) / cols;
 				for (int i = doc->crow - 1 && before < 5; i >= 0; --i)
-					before += doc->rows[i]->rlen / cols + 1;
+					before += (doc->rows[i]->rlen - 1) / cols + 1;
 				/* if not so
 				 */
-				if (before > 5)
+				if (before >= 5)
 					kvim.cy = 6;
 				else
-					kvim.cy = before;
+					kvim.cy = before + 1;
 			}
 			else
 				--kvim.cy;
