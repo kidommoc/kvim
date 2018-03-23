@@ -1,8 +1,6 @@
 #include "kvim.h"
 
-/* handleNormal: handle key <c> in normal mode
- */
-int handleNormal (int c)
+static int move (int c)
 {
 	Doc *doc = kvim.doc[0];
 	int tmp;
@@ -33,6 +31,53 @@ int handleNormal (int c)
 				if (doc->ccol < doc->rows[doc->crow]->len - 1)
 					cursorRight (doc);
 			break;
+		case 'g':
+			if (kvim.iblen && kvim.inputBuf[kvim.iblen - 1] == 'g')
+			{
+				tmp = doc->crow;
+				for (int i = 0; i < tmp; ++i)
+					cursorUp (doc);
+			}
+			else
+				appendInputBuf (c);
+			break;
+		case 'G':
+			if (kvim.iblen == 0)
+			{
+				tmp = doc->len - doc->crow;
+				for (int i = 0; i < tmp; ++i)
+					cursorDown (doc);
+			}
+			else
+			{
+				tmp = getIbNum () - 1;
+				if (!tmp)
+					tmp = doc->len;
+				if (tmp < doc->crow)
+				{
+					tmp = doc->crow - tmp;
+					for (int i = 0; i < tmp; ++i)
+						cursorUp (doc);
+				}
+				else
+				{
+					tmp -= doc->crow;
+					for (int i = 0; i < tmp; ++i)
+						cursorDown (doc);
+				}
+			}
+			break;
+		default:
+			break;
+	}
+}
+
+static int insert (int c)
+{
+	Doc *doc = kvim.doc[0];
+	int tmp;
+	switch (c)
+	{
 		case 'i':
 			kvim.iblen = 0;
 			kvim.mode = MODE_INSERT;
@@ -42,21 +87,6 @@ int handleNormal (int c)
 		case 'a':
 			kvim.iblen = 0;
 			cursorRight (doc);
-			handleNormal ('i');
-			break;
-		case 'x':
-			tmp = getIbNum ();
-			if (doc->rows[doc->crow]->content != NULL)
-			{
-				for (int i = 0; i < tmp; ++i)
-					charsDelete (doc->rows[doc->crow], doc->ccol, 1);
-				updateRender (doc->rows[doc->crow]);
-			}
-			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
-			doc->modified = 1;
-			break;
-		case 's':
-			handleNormal ('x');
 			handleNormal ('i');
 			break;
 		case 'o':
@@ -83,8 +113,34 @@ int handleNormal (int c)
 			setStatus ("MODE: INSERT", 12);
 			doc->modified = 1;
 			break;
+		default:
+			break;
+	}
+}
+
+static int delete (int c)
+{
+	Doc *doc = kvim.doc[0];
+	int tmp;
+	switch (c)
+	{
+		case 'x':
+			tmp = getIbNum ();
+			if (doc->rows[doc->crow]->content != NULL)
+			{
+				for (int i = 0; i < tmp; ++i)
+					charsDelete (doc->rows[doc->crow], doc->ccol, 1);
+				updateRender (doc->rows[doc->crow]);
+			}
+			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
+			doc->modified = 1;
+			break;
+		case 's':
+			handleNormal ('x');
+			handleNormal ('i');
+			break;
 		case 'd':
-			if (kvim.inputBuf[kvim.iblen - 1] == 'd')
+			if (kvim.iblen && kvim.inputBuf[kvim.iblen - 1] == 'd')
 			{
 				--kvim.iblen;
 				tmp = getIbNum ();
@@ -97,10 +153,44 @@ int handleNormal (int c)
 				appendInputBuf (c);
 			doc->modified = 1;
 			break;
-		case ':':
+		default:
+			break;
+	}
+}
+
+/* handleNormal: handle key <c> in normal mode
+ */
+int handleNormal (int c)
+{
+	Doc *doc = kvim.doc[0];
+	int tmp;
+	switch (c)
+	{
+		case ESC:
 			kvim.iblen = 0;
-			if (handleShell () == 2)
-				return 2;
+			break;
+		case 'h':
+		case ARROWLEFT:
+		case 'j':
+		case ARROWDOWN:
+		case 'k':
+		case ARROWUP:
+		case 'l':
+		case ARROWRIGHT:
+		case 'g':
+		case 'G':
+			move (c);
+			break;
+		case 'i':
+		case 'a':
+		case 'o':
+		case 'O':
+			insert (c);
+			break;
+		case 'x':
+		case 's':
+		case 'd':
+			delete (c);
 			break;
 		case '0':
 		case '1':
@@ -118,6 +208,11 @@ int handleNormal (int c)
 				appendInputBuf (c);
 			else
 				kvim.iblen = 0;
+			break;
+		case ':':
+			kvim.iblen = 0;
+			if (handleShell () == 2)
+				return 2;
 			break;
 		default:
 			break;
