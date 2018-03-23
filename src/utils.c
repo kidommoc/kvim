@@ -28,36 +28,40 @@ int convertStrToNum (int* s, int len)
 	return a > 0 ? a : 1;
 }
 
-/* getContentCol: change rendered column <rcol> to its content column
- */
-int getContentCol (const Row *row, int rcol)
+int setStatus (const char *buf, int len)
 {
-	int l = 0, col = 0;
-	for ( ; col < row->len && l < rcol; ++col)
-		if (row->content[col] == '\t')
-			do
-				++l;
-			while (l % TABSTOP != 0 && l % kvim.cols != 0);
-		else
-			++l;
-	return col;
+	if (kvim.status)
+	{
+		free (kvim.status);
+		kvim.stlen = 0;
+	}
+	if (len < kvim.cols)
+	{
+		kvim.status = malloc (len);
+		memcpy (kvim.status, buf, len);
+		kvim.stlen = len;
+	}
+	else
+	{
+		kvim.status = malloc (kvim.cols - 1);
+		kvim.status[0] = '<';
+		memcpy (kvim.status + 1, &buf[len - kvim.cols + 1],
+			kvim.cols - 2);
+		kvim.stlen = kvim.cols - 1;
+	}
+	return 0;
 }
 
-/* getRenderCol: change content column <rcol> to its render column
- */
-int getRenderCol (const Row *row, int col)
+int appendInputBuf (int c)
 {
-	if (row->len == 0)
-		return 0;
-	if (col == row->len)
-		return row->rlen;
-	int l = 0;
-	for (int i = 0; i <= col && i < row->len; ++i)
-		if (row->content[i] == '\t')
-			do
-				++l;
-			while (l % TABSTOP != 0 && l % kvim.cols != 0);
-		else
-			++l;
-	return l - 1;
+	kvim.inputBuf[kvim.iblen] = c;
+	++kvim.iblen;
+	return 0;
+}
+
+int getIbNum (void)
+{
+	int n = convertStrToNum (kvim.inputBuf, kvim.iblen);
+	kvim.iblen = 0;
+	return n;
 }

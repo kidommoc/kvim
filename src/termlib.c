@@ -1,5 +1,14 @@
 #include "kvim.h"
 
+static void sigwinch (int signo)
+{
+	struct winsize sz;
+	ioctl (STDIN, TIOCGWINSZ, (char*) &sz);
+	kvim.rows = sz.ws_row - 1;
+	kvim.cols = sz.ws_col;
+	printContent (kvim.doc[0]);
+}
+
 /* termInit: initialize the tty
  */
 int termInit (void)
@@ -37,6 +46,7 @@ int termInit (void)
 	ioctl (STDIN, TIOCGWINSZ, (char*) &sz);
 	kvim.rows = sz.ws_row - 1;
 	kvim.cols = sz.ws_col;
+	signal (SIGWINCH, sigwinch);
 
 	return 0;
 }
@@ -203,10 +213,40 @@ int printContent (Doc *doc)
 
 /* printStatus: print the status info in <buf>
  */
-int printStatus (const char *buf, int len)
+int printStatus (char *buf, int len)
 {
 	cursorMove (1, kvim.rows + 1);
 	write (STDOUT, "\x1b[2K", 4);
-	write (STDOUT, buf, len);
+	int l1, l2; 
+	char *buf1 = convertNumToStr (kvim.doc[0]->crow + 1, &l1),
+		*buf2 = convertNumToStr (kvim.doc[0]->ccol + 1, &l2);
+	if (len + l1 + l2 + 2 < kvim.cols)
+	{
+		buf = realloc (buf, kvim.cols - 1);
+		for (int i = len; i < kvim.cols - 2 - l1 - l2; ++i)
+			buf[i] = ' ';
+		len = kvim.cols - 1;
+		memcpy (buf + len - l1 - l2 - 1, buf1, l1);
+		buf[len - l2 - 1] = ',';
+		memcpy (buf + len - l2, buf2, l2);
+	}
+	else
+	{
+		buf = realloc (buf, len + l1 + l2 + 2);
+		buf[len] = ' ';
+		memcpy (buf + len + 1, buf1, l1);
+		buf[len + l1 + 1] = ',';
+		memcpy (buf + len + l1 + 2, buf2, l2);
+		len += l1 + l2 + 2;
+	}
+	if (len < kvim.cols)
+		write (STDOUT, buf, len);
+	else
+	{
+		write (STDOUT, "<", 1);
+		write (STDOUT, buf + len - kvim.cols + 2, kvim.cols - 2);
+	}
+	free (buf1);
+	free (buf2);
 	return 0;
 }

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/syscall.h>
+#include <signal.h>
 
 #define STDIN STDIN_FILENO
 #define STDOUT STDOUT_FILENO
@@ -22,6 +23,9 @@
 #define ARROWDOWN 1002
 #define ARROWRIGHT 1003
 #define ARROWLEFT 1004
+#define CTRL_D 4
+#define CTRL_G 7
+#define CTRL_U 21
 
 /* === Command === */
 #define COMMANDNUM 3
@@ -99,8 +103,16 @@ struct Kvim
 
 /* === Declaration === */
 
+/* --- cursor.c --- */
+int cursorUp (Doc *doc);
+int cursorDown (Doc *doc);
+int cursorRight (Doc *doc);
+int cursorLeft (Doc *doc);
+
 #define TABSTOP 4
 /* --- doc.c --- */
+int getRenderCol (const Row *row, int col);
+int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
@@ -113,9 +125,14 @@ Doc* docOpen (char *filename);
 int docSave (Doc *doc);
 int docClose (Doc *doc);
 
-/* --- handle.c --- */
-int setStatus (const char *buf, int len);
-int handleKey (void);
+/* --- insert.c --- */
+int handleInsert (int c);
+
+/* --- normal.c --- */
+int handleNormal (int c);
+
+/* --- shell.c --- */
+int handleShell (void);
 
 /* --- termlib.c --- */
 int termInit (void);
@@ -123,7 +140,7 @@ int termExit (void);
 int cursorMove (int x, int y);
 int getKey (void);
 int printContent (Doc *doc);
-int printStatus (const char *buf, int len);
+int printStatus (char *buf, int len);
 
 /* --- utils.c --- */
 #define MAX(a,b) (a > b ? a : b)
@@ -131,7 +148,8 @@ int printStatus (const char *buf, int len);
 int getNumLen (int n);
 char* convertNumToStr (int n, int *len);
 int convertStrToNum (int* s, int len);
-int getRenderCol (const Row *row, int col);
-int getContentCol (const Row *row, int rcol);
+int setStatus (const char *buf, int len);
+int appendInputBuf (int c);
+int getIbNum (void);
 
 #endif /* KVIM_H */
