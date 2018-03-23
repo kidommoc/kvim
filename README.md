@@ -29,6 +29,15 @@ The following operations are implemented in kvim v1.1:
  - `o`: new next line (to Insert mode)
  - `O`: new previous line (to Insert mode)
  - `dd`: delete the whole line
+ - `gg`: jump to the first line of the doc
+ - `G`: jump to the last line of the doc
+ - `<num>G`: jump to the `<num>` line of the doc
+ - `0`: jump to the beginning of the row
+ - `^`: jump to the first non-empty char of the row
+ - `$`: jump to the end of the row
+ - `^u`: go down half a page
+ - `^d`: go up half a page
+ - `^G`: display doc property
  - `:`: start kvim-shell
 
 - Insert mode:
