@@ -131,6 +131,10 @@ int handleInsert (int c);
 /* --- normal.c --- */
 int handleNormal (int c);
 
+/* --- search.c --- */
+int searchRowForward (Row *row, int start, char dist);
+int searchRowBack (Row *row, int start, char dist);
+
 /* --- shell.c --- */
 int handleShell (void);
 

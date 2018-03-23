@@ -199,6 +199,89 @@ static int delete (int c)
 	}
 }
 
+static int search (int c)
+{
+	Doc *doc = kvim.doc[0];
+	int tmp, tmp1, tmp2, dist;
+	switch (c)
+	{
+		case 'f':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowForward (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp -= doc->ccol;
+			for (int i = 0; i < tmp; ++i)
+				cursorRight (doc);
+			break;
+		case 't':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowForward (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp -= doc->ccol - 1;
+			for (int i = 0; i < tmp; ++i)
+				cursorRight (doc);
+			break;
+		case 'F':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowBack (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp = doc->ccol - tmp;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			break;
+		case 'T':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowBack (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp = doc->ccol - tmp - 1;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			break;
+		default:
+			break;
+	}
+}
+
 static int displayInfo (void)
 {
 	int l, len = kvim.doc[0]->fnlen + 3;	
@@ -261,6 +344,12 @@ int handleNormal (int c)
 		case 's':
 		case 'd':
 			delete (c);
+			break;
+		case 'f':
+		case 't':
+		case 'F':
+		case 'T':
+			search (c);
 			break;
 		case '0':
 			if (kvim.iblen == 0)
