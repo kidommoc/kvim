@@ -60,35 +60,23 @@ int cursorMove (int x, int y)
 	if (x <= 0 || x > kvim.cols || y <= 0 || y > kvim.rows + 1)
 		return 1;
 
-	int len = 2, l = 1, pow = 1;
-	char *s = malloc (2);
+	int len = 2, l;
+	char *s = malloc (2), *tmp;
 	s[0] = '\x1b';
 	s[1] = '[';
-	/* count the length of y
-	 */
-	for (l = 1; y / (pow *= 10); ++l)
-		;
-	len += l;
-	s = realloc (s, len);
 	/* convert y to chars
 	 */
-	for (int i = 0; i < l; ++i, y %= pow)
-		s[len - l + i] = y / (pow /= 10) + 48;
-	++len;
-	s = realloc (s, len);
+	tmp = convertNumToStr (y, &l);
+	s = realloc (s, len + l + 1);
+	memcpy (s + len, tmp, l);
+	len += l + 1;
 	s[len - 1] = ';';
-	/* count the length of x
-	 */
-	for (l = 1; x / (pow *= 10); ++l)
-		;
-	len += l;
-	s = realloc (s, len);
 	/* convert x to chars
 	 */
-	for (int i = 0; i < l; ++i, x %= pow)
-		s[len - l + i] = x / (pow /= 10) + 48;
-	++len;
-	s = realloc (s, len);
+	tmp = convertNumToStr (x, &l);
+	s = realloc (s, len + l + 1);
+	memcpy (s + len, tmp, l);
+	len += l + 1;
 	s[len - 1] = 'H';
 	write (STDOUT, s, len);
 	free (s);
@@ -157,35 +145,57 @@ int printContent (Doc *doc)
 {
 	write (STDOUT, "\x1b[2J\x1b[3J\x1b[H", 11);
 	char *buf = malloc (kvim.rows * kvim.cols);
-	int len = 0, before = 0, strow, stcol = 0, left;
+	int len = 0, before = 0, row, col, left;
+	int cols = kvim.cols - doc->lnlen - 1;
+
 	if (doc->rows[doc->crow]->len == 0)
 		before = 0;
 	else
 		before = getRenderCol (doc->rows[doc->crow], doc->ccol);
-	left = kvim.cy - 1 - before / kvim.cols;
-	strow = doc->crow;
+	left = kvim.cy - 1 - before / cols;
+
+	row = doc->crow;
 	if (left > 0)
 	{
-		for (--strow; left > 0 && strow >= 0; --strow)
-			left -= doc->rows[strow]->rlen / kvim.cols + 1;
-		++strow;
+		for (--row; left > 0 && row >= 0; --row)
+			left -= doc->rows[row]->rlen / cols + 1;
+		++row;
 	}
-	stcol = -left * kvim.cols;
-	left = kvim.rows;
-	for (int i = strow; i < doc->len && left > 0; ++i)
+	col = -left * (kvim.cols - doc->lnlen - 1);
+
+	for (int i = 0; i < kvim.rows; ++i)
 	{
-		if (doc->rows[i]->rlen / kvim.cols + 1 > left)
-			appendBuf (buf, &len, doc->rows[i]->render + stcol, left * kvim.cols - stcol);
+		if (i == 0 || col == 0)
+		{
+			int l = getNumLen (doc->rows[row]->ind + 1);
+			for (int j = 0; j < doc->lnlen - l; ++j)
+				appendBuf (buf, &len, " ", 1);
+			char *s = convertNumToStr (doc->rows[row]->ind + 1, &l);
+			appendBuf (buf, &len, s, l);
+			free (s);
+			appendBuf (buf, &len, " ", 1);
+		}
+		else
+			for (int j = 0; j < doc->lnlen + 1; ++j)
+				appendBuf (buf, &len, " ", 1);
+
+		if (col + cols > doc->rows[row]->rlen)
+		{
+			appendBuf (buf, &len, doc->rows[row]->render + col,
+				(doc->rows[row]->rlen - col) % cols);
+			for (int j = 0; j < cols - (doc->rows[row]->rlen - col);
+				++j)
+				appendBuf (buf, &len, " ", 1);
+			++row;
+			col = 0;
+		}
 		else
 		{
-			appendBuf (buf, &len, doc->rows[i]->render + stcol, doc->rows[i]->rlen - stcol);
-			for (int j = 0; j < kvim.cols - doc->rows[i]->rlen % kvim.cols; ++j)
-				appendBuf (buf, &len, " ", 1);
+			appendBuf (buf, &len, doc->rows[row]->render + col, cols);
+			col += cols;
 		}
-		left -= doc->rows[i]->rlen / kvim.cols + 1;
-		if (stcol)
-			stcol = 0;
 	}
+
 	write (STDOUT, buf, len);
 	free (buf);
 	return 0;

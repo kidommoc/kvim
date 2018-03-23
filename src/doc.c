@@ -1,39 +1,5 @@
 #include "kvim.h"
 
-/* getContentCol: change rendered column <rcol> to its content column
- */
-int getContentCol (const Row *row, int rcol)
-{
-	int l = 0, col = 0;
-	for ( ; col < row->len && l < rcol; ++col)
-		if (row->content[col] == '\t')
-			do
-				++l;
-			while (l % TABSTOP != 0 && l % kvim.cols != 0);
-		else
-			++l;
-	return col;
-}
-
-/* getRenderCol: change content column <rcol> to its render column
- */
-int getRenderCol (const Row *row, int col)
-{
-	if (row->len == 0)
-		return 0;
-	if (col == row->len)
-		return row->rlen;
-	int l = 0;
-	for (int i = 0; i <= col && i < row->len; ++i)
-		if (row->content[i] == '\t')
-			do
-				++l;
-			while (l % TABSTOP != 0 && l % kvim.cols != 0);
-		else
-			++l;
-	return l - 1;
-}
-
 /* charsInsert: insert <len> chars <chars> at <at>
  */
 int charsInsert (Row *row, char *chars, int at, int len)
@@ -81,6 +47,7 @@ int charsDelete (Row *row, int from, int len)
 Row* newRow (void)
 {
 	Row *row = malloc (sizeof (Row));
+	row->ind = 0;
 	row->content = NULL;
 	row->len = 0;
 	row->render = NULL;
@@ -104,8 +71,12 @@ int rowInsert (Doc *doc, Row *row, int at)
 	if (at != doc->len)
 		memmove (doc->rows + at + 1, doc->rows + at,
 			(doc->len - at) * sizeof (Row*));
+	row->ind = at;
 	doc->rows[at] = row;
 	++doc->len;
+	for (int i = at + 1; i < doc->len; ++i)
+		++doc->rows[i]->ind;
+	doc->lnlen = getNumLen (doc->len);
 
 	return 0;
 }
@@ -144,6 +115,9 @@ int rowDelete (Doc *doc, int from)
 		}
 		free (doc->rows);
 		doc->rows = tmp;
+		for (int i = from; i < doc->len; ++i)
+			--doc->rows[i]->ind;
+		doc->lnlen = getNumLen (doc->len);
 	}
 
 	return 0;

@@ -9,22 +9,19 @@
 #include <sys/ioctl.h>
 #include <sys/syscall.h>
 
-#define MAX(a,b) (a > b ? a : b)
-#define MIN(a,b) (a < b ? a : b)
-
 #define STDIN STDIN_FILENO
 #define STDOUT STDOUT_FILENO
 
 /* === Key === */
 #define ESC 27
 #define BACKSPACE 127
-#define DEL 28
+#define DEL 1000
 #define TAB 9
 #define ENTER 10
-#define ARROWUP 11
-#define ARROWDOWN 12
-#define ARROWRIGHT 13
-#define ARROWLEFT 14
+#define ARROWUP 1001
+#define ARROWDOWN 1002
+#define ARROWRIGHT 1003
+#define ARROWLEFT 1004
 
 /* === Command === */
 #define COMMANDNUM 3
@@ -36,6 +33,7 @@ int commandList[COMMANDNUM];
 /* === Struct === */
 
 /* Row: represent a row in the doc
+ * ind: the row index in the doc (based on zero)
  * content: the content of this row
  * len: the length of content
  * render: rendered content with tabs handled
@@ -43,6 +41,7 @@ int commandList[COMMANDNUM];
  */
 typedef struct Row
 {
+	int ind;
 	int len;
 	int rlen;
 	char *content;
@@ -52,6 +51,7 @@ typedef struct Row
 /* Doc: represent a document in the editor
  * rows: the content of this doc
  * len: the length of the rows
+ * lnlen: the length of len
  * crow, ccol: the position of the cursor in this doc
  * crcol: the column where the cursor *should* be in this rendered row
  * filename: the filename of this doc
@@ -61,11 +61,11 @@ typedef struct Row
  */
 typedef struct Doc
 {
-	int len;
+	int len, lnlen;
 	int crow, ccol, crcol;
 	int fd;
-	int modified;
 	int fnlen;
+	int modified;
 	char *filename;
 	Row **rows;
 } Doc;
@@ -82,6 +82,8 @@ typedef struct Doc
  * termIn, termOut: the origin status of STDIN and STDOUT
  * status: status info
  * stlen: the length of status info
+ * inputBuf: input buffer
+ * iblen: the length of input buffer
  */
 struct Kvim
 {
@@ -89,8 +91,9 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
-	int stlen;
+	int stlen, iblen;
 	char *status;
+	int inputBuf[100];
 	Doc **doc;
 } kvim;
 
@@ -98,8 +101,6 @@ struct Kvim
 
 #define TABSTOP 4
 /* --- doc.c --- */
-int getRenderCol (const Row *row, int col);
-int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
@@ -123,5 +124,14 @@ int cursorMove (int x, int y);
 int getKey (void);
 int printContent (Doc *doc);
 int printStatus (const char *buf, int len);
+
+/* --- utils.c --- */
+#define MAX(a,b) (a > b ? a : b)
+#define MIN(a,b) (a < b ? a : b)
+int getNumLen (int n);
+char* convertNumToStr (int n, int *len);
+int convertStrToNum (int* s, int len);
+int getRenderCol (const Row *row, int col);
+int getContentCol (const Row *row, int rcol);
 
 #endif /* KVIM_H */

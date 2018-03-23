@@ -2,6 +2,7 @@
 
 int cursorLeft (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	/* only if not at the most left position
 	 * will cursor move left
 	 */
@@ -14,7 +15,7 @@ int cursorLeft (Doc *doc)
 			l1 = getRenderCol (doc->rows[doc->crow], doc->ccol + 1);
 		/* if so, go up
 		 */
-		if (l1 / kvim.cols - l / kvim.cols > 0)
+		if (l1 / cols - l / cols > 0)
 		{
 			kvim.cx = kvim.cols;
 			/* if reach the top of screen
@@ -24,9 +25,9 @@ int cursorLeft (Doc *doc)
 				/* calculate whether reach the top of the doc
 				 */
 				int before = (MIN (l, doc->rows[doc->crow]->rlen) - 1)
-					/ kvim.cols;
+					/ cols;
 				for (int i = doc->crow - 1 && before < 5; i >= 0; --i)
-					before += doc->rows[i]->rlen / kvim.cols + 1;
+					before += doc->rows[i]->rlen / cols + 1;
 				/* if not so
 				 */
 				if (before > 5)
@@ -38,7 +39,7 @@ int cursorLeft (Doc *doc)
 				--kvim.cy;
 		}
 		else
-			kvim.cx = l % kvim.cols + 1;
+			kvim.cx = l % cols + 2 + doc->lnlen;
 	}
 	/* change rendered position
 	 */
@@ -47,6 +48,7 @@ int cursorLeft (Doc *doc)
 
 int cursorRight (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	/* only if not at the most right position
 	 * will cursor move right
 	 */
@@ -59,31 +61,31 @@ int cursorRight (Doc *doc)
 			l1 = getRenderCol (doc->rows[doc->crow], doc->ccol - 1);
 		/* if so, go down
 		 */
-		if (l / kvim.cols - l1 / kvim.cols > 0)
+		if (l / cols - l1 / cols > 0)
 		{
-			kvim.cx = 1;
+			kvim.cx = doc->lnlen + 2;
 			/* if reach the bottom of screen
 			 */
-			if (kvim.cols - kvim.cy <= 5)
+			if (kvim.rows - kvim.cy <= 5)
 			{
 				/* calculate whether reach the bottom of the doc
 				 */
 				int behind = (MIN (l, doc->rows[doc->crow]->rlen)
-					- 1) / kvim.cols;
+					- 1) / cols;
 				for (int i = doc->crow && behind < 6; i < doc->len; ++i)
-					behind += doc->rows[i]->rlen / kvim.cols + 1;
+					behind += doc->rows[i]->rlen / cols + 1;
 				/* if not so
 				 */
 				if (behind > 5)
-					kvim.cy = kvim.cols - 5;
+					kvim.cy = kvim.rows - 5;
 				else
-					kvim.cy = kvim.cols - behind;
+					kvim.cy = kvim.rows - behind;
 			}
 			else
 				++kvim.cy;
 		}
 		else
-			kvim.cx = l % kvim.cols + 1;
+			kvim.cx = l % cols + 2 + doc->lnlen;
 	}
 	/* change rendered position
 	 */
@@ -92,32 +94,37 @@ int cursorRight (Doc *doc)
 
 int cursorUp (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	if (doc->crow > 0)
 	{
-		kvim.cy -= getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols + 1;
+		kvim.cy -= getRenderCol (doc->rows[doc->crow], doc->ccol)
+			/ cols + 1;
 		--doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
-			kvim.cx = 1;
+			kvim.cx = doc->lnlen + 2;
 			doc->ccol = 0;
 		}
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
-			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % kvim.cols + 1;
+			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % cols
+				+ 2 + doc->lnlen;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
-			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % kvim.cols + 1;
+			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 2
+				+ doc->lnlen;
 		}
-		kvim.cy -= doc->rows[doc->crow]->rlen / kvim.cols - getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+		kvim.cy -= doc->rows[doc->crow]->rlen / cols
+			- getRenderCol (doc->rows[doc->crow], doc->ccol) / cols;
 		if (kvim.cy <= 5)
 		{
 			int before = getRenderCol (doc->rows[doc->crow], doc->ccol)
-				 / kvim.cols;
+				 / cols;
 			for (int i = doc->crow - 1; i >= 0 && before < 5; --i)
-				before += (doc->rows[i]->rlen  - 1) / kvim.cols + 1;
+				before += (doc->rows[i]->rlen  - 1) / cols + 1;
 			if (before >= 5)
 				kvim.cy = 6;
 			else
@@ -128,32 +135,37 @@ int cursorUp (Doc *doc)
 
 int cursorDown (Doc *doc)
 {
+	int cols = kvim.cols - doc->lnlen + 1;
 	if (doc->crow < doc->len - 1)
 	{
-		kvim.cy += doc->rows[doc->crow]->rlen / kvim.cols - getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+		kvim.cy += doc->rows[doc->crow]->rlen / cols
+			- getRenderCol (doc->rows[doc->crow], doc->ccol) / cols;
 		++doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
-			kvim.cx = 1;
+			kvim.cx = doc->lnlen + 2;
 			doc->ccol = 0;
 		}
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
-			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % kvim.cols + 1;
+			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % cols
+				+ 2 + doc->lnlen;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
-			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % kvim.cols + 1;
+			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 2
+				+ doc->lnlen;
 		}
-		kvim.cy += getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols + 1;
+		kvim.cy += getRenderCol (doc->rows[doc->crow], doc->ccol) / cols
+			+ 1;
 		if (kvim.rows - kvim.cy < 5)
 		{
-			int behind = doc->rows[doc->crow]->rlen / kvim.cols -
-				getRenderCol (doc->rows[doc->crow], doc->ccol) / kvim.cols;
+			int behind = doc->rows[doc->crow]->rlen / cols
+				- getRenderCol (doc->rows[doc->crow], doc->ccol) / cols;
 			for (int i = doc->crow + 1; i < doc->len && behind < 5; ++i)
-				behind += (doc->rows[i]->rlen -1 ) / kvim.cols + 1;
+				behind += (doc->rows[i]->rlen - 1) / cols + 1;
 			if (behind >= 5)
 				kvim.cy = kvim.rows - 5;
 			else
@@ -190,9 +202,9 @@ int setStatus (const char *buf, int len)
  */
 int handleCommand (void)
 {
-	char c, *buf = malloc (kvim.cols - 1);
+	char *buf = malloc (kvim.cols - 1);
 	buf[0] = ':';
-	int len = 1, pos = 2;
+	int len = 1, pos = 2, c;
 	printStatus (buf, len);
 	cursorMove (pos, kvim.rows + 1);
 	while ((c = getKey ()) != ENTER)
@@ -332,9 +344,23 @@ int handleCommand (void)
 	return 0;
 }
 
+int appendInputBuf (int c)
+{
+	kvim.inputBuf[kvim.iblen] = c;
+	++kvim.iblen;
+	return 0;
+}
+
+int getIbNum (void)
+{
+	int n = convertStrToNum (kvim.inputBuf, kvim.iblen);
+	kvim.iblen = 0;
+	return n;
+}
+
 /* handleNormal: handle key <c> in normal mode
  */
-int handleNormal (char c)
+int handleNormal (int c)
 {
 	Doc *doc = kvim.doc[0];
 	int tmp;
@@ -342,48 +368,114 @@ int handleNormal (char c)
 	{
 		case 'h':
 		case ARROWLEFT:
-			cursorLeft (doc);
+			tmp = getIbNum ();
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
 			break;
 		case 'j':
 		case ARROWDOWN:
-			cursorDown (doc);
+			tmp = getIbNum ();
+			for (int i = 0; i < tmp; ++i)
+				cursorDown (doc);
 			break;
 		case 'k':
 		case ARROWUP:
-			cursorUp (doc);
+			tmp = getIbNum ();
+			for (int i = 0; i < tmp; ++i)
+				cursorUp (doc);
 			break;
 		case 'l':
 		case ARROWRIGHT:
-			if (doc->ccol < doc->rows[doc->crow]->len - 1)
-				cursorRight (doc);
+			tmp = getIbNum ();
+			for (int i = 0; i < tmp; ++i)
+				if (doc->ccol < doc->rows[doc->crow]->len - 1)
+					cursorRight (doc);
 			break;
 		case 'i':
+			kvim.iblen = 0;
 			kvim.mode = MODE_INSERT;
 			setStatus ("MODE: INSERT", 12);
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			break;
+		case 'a':
+			kvim.iblen = 0;
+			cursorRight (doc);
+			handleNormal ('i');
+			break;
 		case 'x':
+			tmp = getIbNum ();
 			if (doc->rows[doc->crow]->content != NULL)
 			{
-				charsDelete (doc->rows[doc->crow], doc->ccol, 1);
+				for (int i = 0; i < tmp; ++i)
+					charsDelete (doc->rows[doc->crow], doc->ccol, 1);
 				updateRender (doc->rows[doc->crow]);
 			}
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			doc->modified = 1;
 			break;
+		case 's':
+			handleNormal ('x');
+			handleNormal ('i');
+			break;
 		case 'o':
-			rowInsert (doc, newRow (), doc->crow + 1);
 			tmp = doc->ccol;
 			for (int i = 0; i < tmp; ++i)
 				cursorLeft (doc);
-			cursorDown (doc);
+			tmp = getIbNum ();
+			for (int i = 0; i < tmp; ++i)
+				rowInsert (doc, newRow (), doc->crow + 1);
+				cursorDown (doc);
 			kvim.mode = MODE_INSERT;
 			setStatus ("MODE: INSERT", 12);
 			doc->modified = 1;
 			break;
+		case 'O':
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			kvim.cx = 1;
+			tmp = getIbNum ();
+			for (int i = 0; i < tmp; ++i)
+				rowInsert (doc, newRow (), doc->crow);
+			kvim.mode = MODE_INSERT;
+			setStatus ("MODE: INSERT", 12);
+			doc->modified = 1;
+			break;
+		case 'd':
+			if (kvim.inputBuf[kvim.iblen - 1] == 'd')
+			{
+				--kvim.iblen;
+				tmp = getIbNum ();
+				for (int i = 0; i < doc->ccol; ++i)
+					cursorLeft (doc);
+				for (int i = 0; i < tmp; ++i)
+					rowDelete (doc, doc->crow);
+			}
+			else
+				appendInputBuf (c);
+			doc->modified = 1;
+			break;
 		case ':':
+			kvim.iblen = 0;
 			if (handleCommand () == 2)
 				return 2;
+			break;
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			if (kvim.iblen == 0 ||
+				(kvim.inputBuf[kvim.iblen - 1] >= '0' &&
+				kvim.inputBuf[kvim.iblen - 1] <= '9'))
+				appendInputBuf (c);
+			else
+				kvim.iblen = 0;
 			break;
 		default:
 			break;
@@ -393,7 +485,7 @@ int handleNormal (char c)
 
 /* handleInsert: handle key <c> in insert mode
  */
-int handleInsert (char c)
+int handleInsert (int c)
 {
 	Doc *doc = kvim.doc[0];
 	int tmp;
@@ -447,7 +539,7 @@ int handleInsert (char c)
 			doc->modified = 1;
 			break;
 		case TAB:
-			charsInsert (doc->rows[doc->crow], &c, doc->ccol, 1);
+			charsInsert (doc->rows[doc->crow], (char*)&c, doc->ccol, 1);
 			updateRender (doc->rows[doc->crow]);
 			cursorRight (doc);
 			doc->modified = 1;
@@ -468,7 +560,7 @@ int handleInsert (char c)
 			doc->modified = 1;
 			break;
 		default:
-			charsInsert (doc->rows[doc->crow], &c, doc->ccol, 1);
+			charsInsert (doc->rows[doc->crow], (char*)&c, doc->ccol, 1);
 			updateRender (doc->rows[doc->crow]);
 			cursorRight (doc);
 			doc->modified = 1;
@@ -481,7 +573,7 @@ int handleInsert (char c)
  */
 int handleKey (void)
 {
-	char c = getKey ();
+	int c = getKey ();
 	switch (kvim.mode)
 	{
 		case MODE_NORMAL:
