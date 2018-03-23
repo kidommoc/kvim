@@ -2,7 +2,7 @@
 
 const char *USAGE = "Usage: kvim <file>\n";
 
-int init (char *filename)
+static int init (char *filename)
 {
 	termInit ();
 	kvim.status = NULL;
@@ -16,7 +16,7 @@ int init (char *filename)
 	return 0;
 }
 
-int quit (void)
+static int quit (void)
 {
 	if (kvim.status)
 		free (kvim.status);
@@ -53,7 +53,21 @@ int main (int argc, char **argv)
 		printContent (kvim.doc[0]);
 		printStatus (kvim.status, kvim.stlen);
 		cursorMove (kvim.cx, kvim.cy);
-		st = handleKey ();
+
+		int c = getKey ();
+		switch (kvim.mode)
+		{
+			case MODE_NORMAL:
+				setStatus ("MODE: NORMAL", 12);
+				st = handleNormal (c);
+				break;
+			case MODE_INSERT:
+				setStatus ("MODE: INSERT", 12);
+				st = handleInsert (c);
+				break;
+			default:
+				break;
+		}
 	}
 	
 	quit ();
