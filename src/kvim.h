@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/syscall.h>
+#include <signal.h>
 
 #define STDIN STDIN_FILENO
 #define STDOUT STDOUT_FILENO

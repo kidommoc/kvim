@@ -1,5 +1,14 @@
 #include "kvim.h"
 
+static void sigwinch (int signo)
+{
+	struct winsize sz;
+	ioctl (STDIN, TIOCGWINSZ, (char*) &sz);
+	kvim.rows = sz.ws_row - 1;
+	kvim.cols = sz.ws_col;
+	printContent (kvim.doc[0]);
+}
+
 /* termInit: initialize the tty
  */
 int termInit (void)
@@ -37,6 +46,7 @@ int termInit (void)
 	ioctl (STDIN, TIOCGWINSZ, (char*) &sz);
 	kvim.rows = sz.ws_row - 1;
 	kvim.cols = sz.ws_col;
+	signal (SIGWINCH, sigwinch);
 
 	return 0;
 }
