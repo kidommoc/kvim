@@ -35,6 +35,7 @@ int setStatus (const char *buf, int len)
 		free (kvim.status);
 		kvim.stlen = 0;
 	}
+
 	if (len < kvim.cols)
 	{
 		kvim.status = malloc (len);
@@ -64,4 +65,15 @@ int getIbNum (void)
 	int n = convertStrToNum (kvim.inputBuf, kvim.iblen);
 	kvim.iblen = 0;
 	return n;
+}
+
+/* compareStr: compare <str1> and <str2>
+ * return 1 -> equal, 0 -> not equal
+ */
+int compareStr (char *str1, char *str2, int len)
+{
+	for ( ; len > 0; --len, ++str1, ++str2)
+		if (*str1 != *str2)
+			return 0;
+	return 1;
 }

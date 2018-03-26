@@ -207,6 +207,177 @@ static int delete (int c)
 	}
 }
 
+static int search (int c)
+{
+	Doc *doc = kvim.doc[0];
+	int tmp, tmp1, tmp2, dist;
+	switch (c)
+	{
+		case 'f':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowForward (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp -= doc->ccol;
+			for (int i = 0; i < tmp; ++i)
+				cursorRight (doc);
+			break;
+		case 't':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowForward (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp -= doc->ccol - 1;
+			for (int i = 0; i < tmp; ++i)
+				cursorRight (doc);
+			break;
+		case 'F':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowBack (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp = doc->ccol - tmp;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			break;
+		case 'T':
+			tmp1 = getIbNum ();
+			dist = getKey ();
+			tmp = doc->ccol;
+			for (int i = 0; i < tmp1; ++i)
+			{
+				tmp2 = tmp;
+				tmp = searchRowBack (doc->rows[doc->crow], tmp, dist);
+				if (tmp == tmp2)
+				{
+					tmp = doc->ccol;
+					break;
+				}
+			}
+			tmp = doc->ccol - tmp - 1;
+			for (int i = 0; i < tmp; ++i)
+				cursorLeft (doc);
+			break;
+		case 'n':
+			if (kvim.sblen)
+			{
+				tmp1 = doc->crow;
+				tmp2 = doc->ccol + 1;
+				if (searchDocForward (doc, kvim.searchBuf, kvim.sblen,
+					&tmp1, &tmp2))
+				{
+					tmp1 = 0;
+					tmp2 = 0;
+					if (searchDocForward (doc, kvim.searchBuf, kvim.sblen,
+						&tmp1, &tmp2))
+						setStatus ("No result!", 10);
+					else
+					{
+						//setStatus ("Hit the bottom. Start from the top.", 35);
+						tmp = doc->ccol;
+						for (int i = 0; i < tmp; ++i)
+							cursorLeft (doc);
+						tmp = doc->crow;
+						for (int i = tmp1; i < tmp; ++i)
+							cursorUp (doc);
+						for (int i = doc->ccol; i < tmp2; ++i)
+							cursorRight (doc);
+						tmp = 0;
+					}
+				}
+				else
+				{
+					tmp = doc->ccol;
+					for (int i = 0; i < tmp; ++i)
+						cursorLeft (doc);
+					for (int i = doc->crow; i < tmp1; ++i)
+						cursorDown (doc);
+					for (int i = doc->ccol; i < tmp2; ++i)
+						cursorRight (doc);
+				}
+			}
+			else
+				setStatus ("Nothing to search!", 18);
+				;
+			break;
+		case 'N':
+			if (kvim.sblen)
+			{
+				tmp1 = doc->crow;
+				tmp2 = doc->ccol;
+				if (searchDocBack (doc, kvim.searchBuf, kvim.sblen,
+					&tmp1, &tmp2))
+				{
+					tmp1 = doc->len - 1;
+					tmp2 = doc->rows[doc->len - 1]->len - 1;
+					if (searchDocBack (doc, kvim.searchBuf, kvim.sblen,
+						&tmp1, &tmp2))
+						setStatus ("No result!", 10);
+					else
+					{
+						//setStatus ("Hit the top. Start from the bottom.", 35);
+						tmp = doc->ccol;
+						for (int i = 0; i < tmp; ++i)
+							cursorLeft (doc);
+						tmp = doc->crow;
+						for (int i = tmp; i < tmp1; ++i)
+							cursorDown (doc);
+						for (int i = doc->ccol; i < tmp2; ++i)
+							cursorRight (doc);
+					}
+				}
+				else
+				{
+					tmp = doc->ccol;
+					for (int i = 0; i < tmp; ++i)
+						cursorLeft (doc);
+					tmp = doc->crow;
+					for (int i = tmp1; i < tmp; ++i)
+						cursorUp (doc);
+					for (int i = doc->ccol; i < tmp2; ++i)
+						cursorRight (doc);
+				}
+			}
+			else
+				setStatus ("Nothing to search!", 18);
+				;
+			break;
+		case '/':
+			kvim.iblen = 0;
+			shellSearch ();
+			break;
+		default:
+			break;
+	}
+}
+
 static int displayInfo (void)
 {
 	int l, len = kvim.doc[0]->fnlen + 3;	
@@ -270,6 +441,15 @@ int handleNormal (int c)
 		case 'd':
 			delete (c);
 			break;
+		case 'f':
+		case 't':
+		case 'F':
+		case 'T':
+		case 'n':
+		case 'N':
+		case '/':
+			search (c);
+			break;
 		case '0':
 			if (kvim.iblen == 0)
 			{
@@ -297,7 +477,7 @@ int handleNormal (int c)
 			break;
 		case ':':
 			kvim.iblen = 0;
-			if (handleShell () == 2)
+			if (shellCommand () == 2)
 				return 2;
 			break;
 		default:
