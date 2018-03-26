@@ -285,6 +285,94 @@ static int search (int c)
 			for (int i = 0; i < tmp; ++i)
 				cursorLeft (doc);
 			break;
+		case 'n':
+			if (kvim.sblen)
+			{
+				tmp1 = doc->crow;
+				tmp2 = doc->ccol + 1;
+				if (searchDocForward (doc, kvim.searchBuf, kvim.sblen,
+					&tmp1, &tmp2))
+				{
+					tmp1 = 0;
+					tmp2 = 0;
+					if (searchDocForward (doc, kvim.searchBuf, kvim.sblen,
+						&tmp1, &tmp2))
+						setStatus ("No result!", 10);
+					else
+					{
+						//setStatus ("Hit the bottom. Start from the top.", 35);
+						tmp = doc->ccol;
+						for (int i = 0; i < tmp; ++i)
+							cursorLeft (doc);
+						tmp = doc->crow;
+						for (int i = tmp1; i < tmp; ++i)
+							cursorUp (doc);
+						for (int i = doc->ccol; i < tmp2; ++i)
+							cursorRight (doc);
+						tmp = 0;
+					}
+				}
+				else
+				{
+					tmp = doc->ccol;
+					for (int i = 0; i < tmp; ++i)
+						cursorLeft (doc);
+					for (int i = doc->crow; i < tmp1; ++i)
+						cursorDown (doc);
+					for (int i = doc->ccol; i < tmp2; ++i)
+						cursorRight (doc);
+				}
+			}
+			else
+				setStatus ("Nothing to search!", 18);
+				;
+			break;
+		case 'N':
+			if (kvim.sblen)
+			{
+				tmp1 = doc->crow;
+				tmp2 = doc->ccol;
+				if (searchDocBack (doc, kvim.searchBuf, kvim.sblen,
+					&tmp1, &tmp2))
+				{
+					tmp1 = doc->len - 1;
+					tmp2 = doc->rows[doc->len - 1]->len - 1;
+					if (searchDocBack (doc, kvim.searchBuf, kvim.sblen,
+						&tmp1, &tmp2))
+						setStatus ("No result!", 10);
+					else
+					{
+						//setStatus ("Hit the top. Start from the bottom.", 35);
+						tmp = doc->ccol;
+						for (int i = 0; i < tmp; ++i)
+							cursorLeft (doc);
+						tmp = doc->crow;
+						for (int i = tmp; i < tmp1; ++i)
+							cursorDown (doc);
+						for (int i = doc->ccol; i < tmp2; ++i)
+							cursorRight (doc);
+					}
+				}
+				else
+				{
+					tmp = doc->ccol;
+					for (int i = 0; i < tmp; ++i)
+						cursorLeft (doc);
+					tmp = doc->crow;
+					for (int i = tmp1; i < tmp; ++i)
+						cursorUp (doc);
+					for (int i = doc->ccol; i < tmp2; ++i)
+						cursorRight (doc);
+				}
+			}
+			else
+				setStatus ("Nothing to search!", 18);
+				;
+			break;
+		case '/':
+			kvim.iblen = 0;
+			shellSearch ();
+			break;
 		default:
 			break;
 	}
@@ -357,6 +445,9 @@ int handleNormal (int c)
 		case 't':
 		case 'F':
 		case 'T':
+		case 'n':
+		case 'N':
+		case '/':
 			search (c);
 			break;
 		case '0':
@@ -386,7 +477,7 @@ int handleNormal (int c)
 			break;
 		case ':':
 			kvim.iblen = 0;
-			if (handleShell () == 2)
+			if (shellCommand () == 2)
 				return 2;
 			break;
 		default:

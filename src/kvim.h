@@ -88,6 +88,8 @@ typedef struct Doc
  * stlen: the length of status info
  * inputBuf: input buffer
  * iblen: the length of input buffer
+ * searchBuf: search buffer
+ * sblen: the length of search buffer
  */
 struct Kvim
 {
@@ -95,9 +97,10 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
-	int stlen, iblen;
+	int stlen, iblen, sblen;
 	char *status;
 	int inputBuf[100];
+	char *searchBuf;
 	Doc **doc;
 } kvim;
 
@@ -134,9 +137,12 @@ int handleNormal (int c);
 /* --- search.c --- */
 int searchRowForward (Row *row, int start, char dist);
 int searchRowBack (Row *row, int start, char dist);
+int searchDocForward (Doc *doc, char *dist, int len, int *row, int *col);
+int searchDocBack (Doc *doc, char *dist, int len, int *row, int *col);
 
 /* --- shell.c --- */
-int handleShell (void);
+int shellCommand (void);
+int shellSearch (void);
 
 /* --- termlib.c --- */
 int termInit (void);
@@ -155,5 +161,6 @@ int convertStrToNum (int* s, int len);
 int setStatus (const char *buf, int len);
 int appendInputBuf (int c);
 int getIbNum (void);
+int compareStr (char *str1, char *str2, int len);
 
 #endif /* KVIM_H */
