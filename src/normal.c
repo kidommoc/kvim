@@ -35,6 +35,10 @@ static int move (int c)
 		case 'g':
 			if (kvim.iblen && kvim.inputBuf[kvim.iblen - 1] == 'g')
 			{
+				kvim.iblen = 0;
+				tmp = doc->ccol;
+				for (int i = 0; i < tmp; ++i)
+					cursorLeft (doc);
 				tmp = doc->crow;
 				for (int i = 0; i < tmp; ++i)
 					cursorUp (doc);
@@ -45,12 +49,16 @@ static int move (int c)
 		case 'G':
 			if (kvim.iblen == 0)
 			{
+				tmp = doc->ccol;
+				for (int i = 0; i < tmp; ++i)
+					cursorLeft (doc);
 				tmp = doc->len - doc->crow;
 				for (int i = 0; i < tmp; ++i)
 					cursorDown (doc);
 			}
 			else
 			{
+				kvim.iblen = 0;
 				tmp = getIbNum () - 1;
 				if (!tmp)
 					tmp = doc->len;
