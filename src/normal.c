@@ -4,7 +4,7 @@ static int move (int c)
 {
 	int cols = kvim.cols - kvim.doc[0]->lnlen - 1;
 	Doc *doc = kvim.doc[0];
-	int tmp;
+	int tmp, tmp1, tmp2;
 	switch (c)
 	{
 		case 'h':
@@ -95,6 +95,7 @@ static int move (int c)
 				cursorRight (doc);
 			break;
 		case CTRL_U:
+			tmp2 = kvim.cy;
 			for (tmp = 0; tmp < kvim.rows / 2 && doc->crow > 0; )
 			{
 				tmp += (getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
@@ -104,8 +105,21 @@ static int move (int c)
 					- getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
 					/ cols;
 			}
+			tmp = 0;
+			tmp1 = doc->ccol;
+			for (int i = doc->crow; i >= 0; --i)
+			{
+				if (tmp1)
+					tmp += getRenderCol (doc->rows[i], tmp1) / kvim.cols + 1;
+				else
+					tmp += doc->rows[i]->rlen / kvim.cols + 1;
+				tmp1 = 0;
+			}
+			if (tmp > tmp2)
+				kvim.cy = tmp2;
 			break;
 		case CTRL_D:
+			tmp2 = kvim.cy;
 			for (tmp = 0; tmp < kvim.rows / 2 && doc->crow < doc->len - 1; )
 			{
 				tmp += (doc->rows[doc->crow]->rlen
@@ -115,6 +129,19 @@ static int move (int c)
 				tmp += (getRenderCol (doc->rows[doc->crow], doc->ccol) + 1)
 					/ cols;
 			}
+			tmp = 0;
+			tmp1 = doc->ccol;
+			for (int i = doc->crow; i < doc->len; ++i)
+			{
+				if (tmp1)
+					tmp +=  (doc->rows[i]->rlen - 1
+					- getRenderCol (doc->rows[i], tmp1)) / kvim.cols;
+				else
+					tmp += doc->rows[i]->rlen / kvim.cols + 1;
+				tmp1 = 0;
+			}
+			if (tmp > kvim.rows - tmp2)
+				kvim.cy = tmp2;
 			break;
 		default:
 			break;
