@@ -64,14 +64,23 @@ int charsDelete (Row *row, int from, int len)
 	if (from < 0 || from > row->len)
 		return 1;
 
+	char *tmp;
 	if (from + len < row->len)
 	{
-		memmove (row->content + from, row->content + from + len,
+		tmp = malloc (row->len - len);
+		memcpy (tmp, row->content, from);
+		memcpy (tmp + from, row->content + from + len,
 			row->len - from - len);
 		row->len -= len;
 	}
 	else
+	{
+		tmp = malloc (from);
+		memcpy (tmp, row->content, from);
 		row->len = from;
+	}
+	free (row->content);
+	row->content = tmp;
 
 	return 0;
 }
