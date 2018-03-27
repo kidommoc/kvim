@@ -55,12 +55,6 @@ int handleInsert (int c)
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			doc->modified = 1;
 			break;
-		case TAB:
-			charsInsert (doc->rows[doc->crow], (char*)&c, doc->ccol, 1);
-			updateRender (doc->rows[doc->crow]);
-			cursorRight (doc);
-			doc->modified = 1;
-			break;
 		case ENTER:
 			rowInsert (doc, newRow (), doc->crow + 1);
 			charsInsert (doc->rows[doc->crow + 1],

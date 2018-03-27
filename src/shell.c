@@ -1,12 +1,8 @@
 #include "kvim.h"
 
-/* handleShell: handle kvim-shell command
- */
-int handleShell (void)
+static int shell (char *buf, int len, int pos)
 {
-	char *buf = malloc (kvim.cols - 1);
-	buf[0] = ':';
-	int len = 1, pos = 2, c;
+	int c;
 	printStatus (buf, len);
 	cursorMove (pos, kvim.rows + 1);
 	while ((c = getKey ()) != ENTER)
@@ -74,6 +70,19 @@ int handleShell (void)
 		}
 		cursorMove (pos, kvim.rows + 1);
 	}
+	return len;
+}
+
+/* shellCommand: handle kvim-shell command
+ */
+int shellCommand (void)
+{
+	char *buf = malloc (kvim.cols - 1);
+	buf[0] = ':';
+	int len = 1, pos = 2;
+
+	if (!(len = shell (buf, len, pos)))
+		return 0;
 
 	int i;
 	/* initialize command list
@@ -133,7 +142,7 @@ int handleShell (void)
 				return 2;
 			}
 			else
-				setStatus ("\x1b[101mWarning: modified without saving. (add ! to quit anyway)\x1b[0m", 66);
+				setStatus ("Warning: modified without saving. (add ! to quit anyway)", 56);
 		}
 		else
 		{
@@ -143,5 +152,25 @@ int handleShell (void)
 	}
 
 	free (buf);
+	return 0;
+}
+
+int shellSearch (void)
+{
+	char *buf = malloc (kvim.cols - 1);
+	buf[0] = '/';
+	int len = 1, pos = 2;
+
+	if (!(len = shell (buf, len, pos)))
+		return 0;
+
+	if (kvim.searchBuf)
+		free (kvim.searchBuf);
+	kvim.sblen = len - 1;
+	kvim.searchBuf = malloc (kvim.sblen);
+	memcpy (kvim.searchBuf, buf + 1, kvim.sblen);
+	free (buf);
+	handleNormal ('n');
+
 	return 0;
 }

@@ -12,6 +12,8 @@ static int init (char *filename)
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);
 	kvim.cx = kvim.doc[0]->lnlen + 2;
+	kvim.searchBuf = NULL;
+	kvim.sblen = 0;
 	setStatus ("MODE: NORMAL", 12);
 	return 0;
 }
@@ -20,6 +22,8 @@ static int quit (void)
 {
 	if (kvim.status)
 		free (kvim.status);
+	if (kvim.searchBuf)
+		free (kvim.searchBuf);
 	docClose (kvim.doc[0]);
 	free (kvim.doc);
 	termExit ();
@@ -64,6 +68,10 @@ int main (int argc, char **argv)
 			case MODE_INSERT:
 				setStatus ("MODE: INSERT", 12);
 				st = handleInsert (c);
+				break;
+			case MODE_REPLACE:
+				setStatus ("MODE: REPLACE", 13);
+				st = handleReplace (c);
 				break;
 			default:
 				break;
