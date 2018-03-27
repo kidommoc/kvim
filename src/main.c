@@ -69,6 +69,10 @@ int main (int argc, char **argv)
 				setStatus ("MODE: INSERT", 12);
 				st = handleInsert (c);
 				break;
+			case MODE_REPLACE:
+				setStatus ("MODE: REPLACE", 13);
+				st = handleReplace (c);
+				break;
 			default:
 				break;
 		}

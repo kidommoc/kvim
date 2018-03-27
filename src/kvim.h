@@ -77,6 +77,7 @@ typedef struct Doc
 /* --- Editor mode --- */
 #define MODE_NORMAL 0
 #define MODE_INSERT 1
+#define MODE_REPLACE 2
 
 /* Kvim: represent the editor
  * doc: the document
@@ -133,6 +134,9 @@ int handleInsert (int c);
 
 /* --- normal.c --- */
 int handleNormal (int c);
+
+/* --- replace.c --- */
+int handleReplace (int c);
 
 /* --- search.c --- */
 int searchRowForward (Row *row, int start, char dist);
