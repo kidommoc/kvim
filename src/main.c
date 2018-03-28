@@ -7,13 +7,13 @@ static int init (char *filename)
 	termInit ();
 	kvim.status = NULL;
 	kvim.stlen = 0;
-	kvim.iblen = 0;
 	kvim.mode = MODE_NORMAL;
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);
 	kvim.cx = kvim.doc[0]->lnlen + 2;
-	kvim.searchBuf = NULL;
-	kvim.sblen = 0;
+	ib.len = 0;
+	sb.searchBuf = NULL;
+	sb.len = 0;
 	setStatus ("MODE: NORMAL", 12);
 	return 0;
 }
@@ -22,8 +22,8 @@ static int quit (void)
 {
 	if (kvim.status)
 		free (kvim.status);
-	if (kvim.searchBuf)
-		free (kvim.searchBuf);
+	if (sb.searchBuf)
+		free (sb.searchBuf);
 	docClose (kvim.doc[0]);
 	free (kvim.doc);
 	termExit ();

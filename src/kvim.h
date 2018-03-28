@@ -87,10 +87,6 @@ typedef struct Doc
  * termIn, termOut: the origin status of STDIN and STDOUT
  * status: status info
  * stlen: the length of status info
- * inputBuf: input buffer
- * iblen: the length of input buffer
- * searchBuf: search buffer
- * sblen: the length of search buffer
  */
 struct Kvim
 {
@@ -98,12 +94,30 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
-	int stlen, iblen, sblen;
+	int stlen;
 	char *status;
-	int inputBuf[100];
-	char *searchBuf;
 	Doc **doc;
 } kvim;
+
+/* InputBuf
+ * inputBuf: input buffer
+ * iblen: the length of input buffer
+ */
+struct InputBuf
+{
+	int len;
+	int inputBuf[100];
+} ib;
+
+/* SearchBuf
+ * searchBuf: search buffer
+ * sblen: the length of search buffer
+ */
+struct SearchBuf
+{
+	int len;
+	char *searchBuf;
+} sb;
 
 /* === Declaration === */
 

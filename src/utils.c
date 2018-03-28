@@ -55,15 +55,15 @@ int setStatus (const char *buf, int len)
 
 int appendInputBuf (int c)
 {
-	kvim.inputBuf[kvim.iblen] = c;
-	++kvim.iblen;
+	ib.inputBuf[ib.len] = c;
+	++ib.len;
 	return 0;
 }
 
 int getIbNum (void)
 {
-	int n = convertStrToNum (kvim.inputBuf, kvim.iblen);
-	kvim.iblen = 0;
+	int n = convertStrToNum (ib.inputBuf, ib.len);
+	ib.len = 0;
 	return n;
 }
 
