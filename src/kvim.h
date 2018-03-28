@@ -119,6 +119,23 @@ struct SearchBuf
 	char *searchBuf;
 } sb;
 
+/* Clipboard
+ * clipbuf: clip buffer
+ * len: the length of clip buffer
+ * type: the type of clip buffer (CHAR or ROW)
+ */
+#define CT_CHAR 0
+#define CT_ROW 1
+struct ClipBoard
+{
+	int len, type;
+	union ClipBuf
+	{
+		char *c;
+		Row **r;
+	} clipBuf;
+} cb;
+
 /* === Declaration === */
 
 /* --- cursor.c --- */
@@ -134,6 +151,7 @@ int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
+Row *cpyRow (const Row *from);
 int rowInsert (Doc *doc, Row *rows, int at);
 int rowDelete (Doc *doc, int from);
 int updateRender (Row *row);
@@ -179,6 +197,8 @@ int convertStrToNum (int* s, int len);
 int setStatus (const char *buf, int len);
 int appendInputBuf (int c);
 int getIbNum (void);
+int addClipboardChar (Row *row, int from, int len);
+int addClipboardRow (Doc *doc, int from, int len);
 int compareStr (char *str1, char *str2, int len);
 
 #endif /* KVIM_H */

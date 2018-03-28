@@ -199,10 +199,11 @@ static int delete (Doc *doc, int c)
 	{
 		case 'x':
 			tmp = getIbNum ();
+			addClipboardChar (doc->rows[doc->crow], doc->ccol, tmp);
+
 			if (doc->rows[doc->crow]->content != NULL)
 			{
-				for (int i = 0; i < tmp; ++i)
-					charsDelete (doc->rows[doc->crow], doc->ccol, 1);
+				charsDelete (doc->rows[doc->crow], doc->ccol, tmp);
 				updateRender (doc->rows[doc->crow]);
 			}
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
@@ -219,12 +220,52 @@ static int delete (Doc *doc, int c)
 				tmp = getIbNum ();
 				for (int i = 0; i < doc->ccol; ++i)
 					cursorLeft (doc);
+				addClipboardRow (doc, doc->crow, tmp);
 				for (int i = 0; i < tmp; ++i)
 					rowDelete (doc, doc->crow);
 				doc->modified = 1;
 			}
 			else
 				appendInputBuf (c);
+			break;
+		default:
+			break;
+	}
+}
+
+static int paste (Doc *doc, int c)
+{
+	switch (c)
+	{
+		case 'p':
+			if (cb.type == CT_CHAR)
+			{
+				charsInsert (doc->rows[doc->crow], cb.clipBuf.c,
+					doc->ccol + 1, cb.len);
+				updateRender (doc->rows[doc->crow]);
+				for (int i = 0; i < cb.len; ++i)
+					cursorRight (doc);
+			}
+			else if (cb.type == CT_ROW)
+				for (int i = 0; i < cb.len; ++i)
+				{
+					rowInsert (doc, cpyRow (cb.clipBuf.r[i]),
+						doc->crow + 1);
+					cursorDown (doc);
+				}
+			break;
+		case 'P':
+			if (cb.type == CT_CHAR)
+			{
+				charsInsert (doc->rows[doc->crow], cb.clipBuf.c,
+					doc->ccol, cb.len);
+				updateRender (doc->rows[doc->crow]);
+				for (int i = 0; i < cb.len - 1; ++i)
+					cursorRight (doc);
+			}
+			else if (cb.type == CT_ROW)
+				for (int i = cb.len - 1; i >= 0; --i)
+					rowInsert (doc, cpyRow (cb.clipBuf.r[i]), doc->crow);
 			break;
 		default:
 			break;
@@ -503,6 +544,10 @@ int handleNormal (int c)
 		case 's':
 		case 'd':
 			delete (doc, c);
+			break;
+		case 'p':
+		case 'P':
+			paste (doc, c);
 			break;
 		case 'r':
 			replace (doc);

@@ -8,13 +8,16 @@ static int init (char *filename)
 	kvim.status = NULL;
 	kvim.stlen = 0;
 	kvim.mode = MODE_NORMAL;
+	setStatus ("MODE: NORMAL", 12);
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);
 	kvim.cx = kvim.doc[0]->lnlen + 2;
 	ib.len = 0;
 	sb.searchBuf = NULL;
 	sb.len = 0;
-	setStatus ("MODE: NORMAL", 12);
+	cb.type = CT_CHAR;
+	cb.clipBuf.c = NULL;
+	cb.clipBuf.r = NULL;
 	return 0;
 }
 
@@ -26,6 +29,19 @@ static int quit (void)
 		free (sb.searchBuf);
 	docClose (kvim.doc[0]);
 	free (kvim.doc);
+	if (cb.type == CT_ROW && cb.clipBuf.r)
+	{
+		for (int i = 0; i < cb.len; ++i)
+		{
+			if (cb.clipBuf.r[i]->content)
+				free (cb.clipBuf.r[i]->content);
+			if (cb.clipBuf.r[i]->render)
+				free (cb.clipBuf.r[i]->render);
+		}
+		free (cb.clipBuf.r);
+	}
+	else if (cb.type == CT_CHAR && cb.clipBuf.c)
+		free (cb.clipBuf.c);
 	termExit ();
 	return 0;
 }

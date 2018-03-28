@@ -77,3 +77,58 @@ int compareStr (char *str1, char *str2, int len)
 			return 0;
 	return 1;
 }
+
+int addClipboardChar (Row *row, int from, int len)
+{
+	if (from + len > row->len)
+		len = row->len - from;
+
+	if (cb.type == CT_ROW && cb.clipBuf.r)
+	{
+		for (int i = 0; i < cb.len; ++i)
+		{
+			if (cb.clipBuf.r[i]->content)
+				free (cb.clipBuf.r[i]->content);
+			if (cb.clipBuf.r[i]->render)
+				free (cb.clipBuf.r[i]->render);
+		}
+		free (cb.clipBuf.r);
+	}
+	else if (cb.type == CT_CHAR && cb.clipBuf.c)
+		free (cb.clipBuf.c);
+	cb.type = CT_CHAR;
+
+	cb.clipBuf.c = malloc (len);
+	memcpy (cb.clipBuf.c, row->content + from, len);
+	cb.len = len;
+
+	return 0;
+}
+
+int addClipboardRow (Doc *doc, int from, int len)
+{
+	if (from + len > doc->len)
+		len = doc->len - from;
+
+	if (cb.type == CT_ROW && cb.clipBuf.r)
+	{
+		for (int i = 0; i < cb.len; ++i)
+		{
+			if (cb.clipBuf.r[i]->content)
+				free (cb.clipBuf.r[i]->content);
+			if (cb.clipBuf.r[i]->render)
+				free (cb.clipBuf.r[i]->render);
+		}
+		free (cb.clipBuf.r);
+	}
+	else if (cb.type == CT_CHAR && cb.clipBuf.c)
+		free (cb.clipBuf.c);
+	cb.type = CT_ROW;
+
+	cb.clipBuf.r = malloc (len * sizeof (Row*));
+	for (int i = 0; i < len; ++i)
+		cb.clipBuf.r[i] = cpyRow (doc->rows[from + i]);
+	cb.len = len;
+	
+	return 0;
+}
