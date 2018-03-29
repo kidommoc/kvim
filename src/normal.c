@@ -218,6 +218,7 @@ static int delete (Doc *doc, int c)
 			{
 				--ib.len;
 				tmp = getIbNum ();
+				tmp = MIN (tmp, doc->len - doc->crow);
 				for (int i = 0; i < doc->ccol; ++i)
 					cursorLeft (doc);
 				addClipboardRow (doc, doc->crow, tmp);
@@ -233,10 +234,28 @@ static int delete (Doc *doc, int c)
 	}
 }
 
-static int paste (Doc *doc, int c)
+static int copy_paste (Doc *doc, int c)
 {
 	switch (c)
 	{
+		case 'y':
+			if (ib.len && ib.inputBuf[ib.len - 1] == 'y')
+			{
+				--ib.len;
+				int tmp = getIbNum (), tmp1;
+				tmp = MIN (tmp, doc->len - doc->crow);
+				addClipboardRow (doc, doc->crow, tmp);
+				char *tmp2 = convertNumToStr (tmp, &tmp1),
+					*tmp3 = malloc (tmp1 + 8);
+				memcpy (tmp3, tmp2, tmp1);
+				memcpy (tmp3 + tmp1, "L copied", 8);
+				setStatus (tmp3, tmp1 + 8);
+				free (tmp2);
+				free (tmp3);
+			}
+			else
+				appendInputBuf (c);
+			break;
 		case 'p':
 			if (cb.type == CT_CHAR)
 			{
@@ -253,6 +272,7 @@ static int paste (Doc *doc, int c)
 						doc->crow + 1);
 					cursorDown (doc);
 				}
+			doc->modified = 1;
 			break;
 		case 'P':
 			if (cb.type == CT_CHAR)
@@ -267,6 +287,7 @@ static int paste (Doc *doc, int c)
 				for (int i = cb.len - 1; i >= 0; --i)
 					rowInsert (doc, cpyRow (cb.clipBuf.r[i]), doc->crow);
 			break;
+			doc->modified = 1;
 		default:
 			break;
 	}
@@ -545,9 +566,10 @@ int handleNormal (int c)
 		case 'd':
 			delete (doc, c);
 			break;
+		case 'y':
 		case 'p':
 		case 'P':
-			paste (doc, c);
+			copy_paste (doc, c);
 			break;
 		case 'r':
 			replace (doc);
