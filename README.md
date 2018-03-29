@@ -24,11 +24,14 @@ The following operations are implemented in kvim v1.1:
  - `h`/`j`/`k`/`l`: cursor moving (left, down, up, right)
  - `i`: insert (to Insert mode)
  - `a`: append (to Insert mode)
- - `x`: delete
- - `s`: delete (to Insert mode)
+ - `x`: cut to clipboard
+ - `s`: cut to clipboard (to Insert mode)
  - `o`: new next line (to Insert mode)
  - `O`: new previous line (to Insert mode)
  - `dd`: delete the whole line
+ - `yy`: copy the whole line
+ - `p`: paste afterwards
+ - `P`: pase forward
  - `gg`: jump to the first line of the doc
  - `G`: jump to the last line of the doc
  - `<num>G`: jump to the `<num>` line of the doc
@@ -55,7 +58,7 @@ The following operations are implemented in kvim v1.1:
 - Replace mode:
  - `ESC`: quit (to Normal mode)
 
-Note that it's supported to add number before `h`, `j`, `k`, `l`, `x`, `s`, `dd`, `f`, `t`, `F`, and `T` to indicate the length to move/delete. For instance, enter `12x` will cause a 12-char deletion.
+Note that it's supported to add number before `h`, `j`, `k`, `l`, `x`, `s`, `dd`, `yy`, `f`, `t`, `F`, and `T` to indicate the length to move/delete. For instance, enter `12x` will cause a 12-char deletion.
 
 ## Kvim-shell
 
