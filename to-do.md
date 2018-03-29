@@ -17,7 +17,7 @@
 # v 1.3
 
 - search (not support regular expression) and replace
-- operation: \<num\>{fFtT}\<char\> n N r R w e
+- operation: \<num\>{fFtT}\<char\> n N r R
 - command: \
 
 # v 1.4

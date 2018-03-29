@@ -35,19 +35,33 @@ The following operations are implemented in kvim v1.1:
  - `0`: jump to the beginning of the row
  - `^`: jump to the first non-empty char of the row
  - `$`: jump to the end of the row
+ - `f<char>`: jump at next \<char\> of the row
+ - `t<char>`: jump at previous \<char\> of the row
+ - `F<char>`: jump to next \<char\> of the row
+ - `T<char>`: jump to previous \<char\> of the row
+ - `n`: jump to next search result of the doc
+ - `N`: jump to previous search result of the doc
+ - `r<char>`: replace this char by \<char\>
+ - `R`: switch to Replace mode
  - `^u`: go down half a page
  - `^d`: go up half a page
  - `^G`: display doc property
- - `:`: start kvim-shell
+ - `:`: start kvim-shell (command mode)
+ - `/`: start kvim-shell (search mode)
 
 - Insert mode:
  - `ESC`: quit (to Normal mode)
 
-Note that it's supported to add number before `h`, `j`, `k`, `l`, `x`, `s` and `dd` to indicate the length to move/delete. For instance, enter `12x` will cause a 12-char deletion.
+- Replace mode:
+ - `ESC`: quit (to Normal mode)
+
+Note that it's supported to add number before `h`, `j`, `k`, `l`, `x`, `s`, `dd`, `f`, `t`, `F`, and `T` to indicate the length to move/delete. For instance, enter `12x` will cause a 12-char deletion.
 
 ## Kvim-shell
 
-It's just like a common shell, except the input buffer can't be longer than the width of the screen. Here follows the supported command:
+It's just like a common shell, except the input buffer can't be longer than the width of the screen.
+
+Here follows the supported command in command mode:
 
 - `w`: save the doc
 - `w filename`: save the doc as `filename`
@@ -55,3 +69,5 @@ It's just like a common shell, except the input buffer can't be longer than the 
 - `!`: make other command mandatory
 
 Command can be conbined like `wq` or `wq filename`.
+
+In search mode, just type the string to search and press ENTER to search. After that, `n` and `N` in normal mode can help jump to the next/previous result. SPACE is also supported.

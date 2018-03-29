@@ -309,7 +309,7 @@ static int search (Doc *doc, int c)
 					break;
 				}
 			}
-			tmp -= doc->ccol - 1;
+			tmp -= doc->ccol + 1;
 			for (int i = 0; i < tmp; ++i)
 				cursorRight (doc);
 			break;
@@ -345,7 +345,7 @@ static int search (Doc *doc, int c)
 					break;
 				}
 			}
-			tmp = doc->ccol - tmp - 1;
+			tmp = doc->ccol - tmp + 1;
 			for (int i = 0; i < tmp; ++i)
 				cursorLeft (doc);
 			break;
