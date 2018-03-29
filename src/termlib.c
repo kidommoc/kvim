@@ -59,7 +59,7 @@ int termExit (void)
 	kvim.termOut.c_lflag |= ECHO|ICANON|ISIG;
 	tcsetattr (STDIN, TCSANOW, &kvim.termIn);
 	tcsetattr (STDOUT, TCSANOW, &kvim.termOut);
-	write (STDOUT, "\x1b[2J\x1b[H", 7);
+	write (STDOUT, "\x1b[2J\x1b[3J\x1b[H", 11);
 	return 0;
 }
 

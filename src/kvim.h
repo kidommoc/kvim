@@ -87,10 +87,6 @@ typedef struct Doc
  * termIn, termOut: the origin status of STDIN and STDOUT
  * status: status info
  * stlen: the length of status info
- * inputBuf: input buffer
- * iblen: the length of input buffer
- * searchBuf: search buffer
- * sblen: the length of search buffer
  */
 struct Kvim
 {
@@ -98,12 +94,47 @@ struct Kvim
 	int cx, cy;
 	int mode;
 	struct termios termIn, termOut;
-	int stlen, iblen, sblen;
+	int stlen;
 	char *status;
-	int inputBuf[100];
-	char *searchBuf;
 	Doc **doc;
 } kvim;
+
+/* InputBuf
+ * inputBuf: input buffer
+ * iblen: the length of input buffer
+ */
+struct InputBuf
+{
+	int len;
+	int inputBuf[100];
+} ib;
+
+/* SearchBuf
+ * searchBuf: search buffer
+ * sblen: the length of search buffer
+ */
+struct SearchBuf
+{
+	int len;
+	char *searchBuf;
+} sb;
+
+/* Clipboard
+ * clipbuf: clip buffer
+ * len: the length of clip buffer
+ * type: the type of clip buffer (CHAR or ROW)
+ */
+#define CT_CHAR 0
+#define CT_ROW 1
+struct ClipBoard
+{
+	int len, type;
+	union ClipBuf
+	{
+		char *c;
+		Row **r;
+	} clipBuf;
+} cb;
 
 /* === Declaration === */
 
@@ -120,6 +151,7 @@ int getContentCol (const Row *row, int rcol);
 int charsInsert (Row *row, char *chars, int at, int len);
 int charsDelete (Row *row, int from, int len);
 Row* newRow (void);
+Row *cpyRow (const Row *from);
 int rowInsert (Doc *doc, Row *rows, int at);
 int rowDelete (Doc *doc, int from);
 int updateRender (Row *row);
@@ -165,6 +197,8 @@ int convertStrToNum (int* s, int len);
 int setStatus (const char *buf, int len);
 int appendInputBuf (int c);
 int getIbNum (void);
+int addClipboardChar (Row *row, int from, int len);
+int addClipboardRow (Doc *doc, int from, int len);
 int compareStr (char *str1, char *str2, int len);
 
 #endif /* KVIM_H */

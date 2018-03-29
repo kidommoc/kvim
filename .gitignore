@@ -1,0 +1,5 @@
+src/count
+src/run
+src/*.sh
+src/test*
+src/.*.swp

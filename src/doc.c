@@ -98,6 +98,20 @@ Row* newRow (void)
 	return row;
 }
 
+/* cpyRow: copy a row and return it
+ */
+Row *cpyRow (const Row *from)
+{
+	Row *row = newRow ();
+	row->content = malloc (from->len);
+	memcpy (row->content, from->content, from->len);
+	row->len = from->len;
+	row->render = malloc (from->rlen);
+	memcpy (row->render, from->render, from->rlen);
+	row->rlen = from->rlen;
+	return row;
+}
+
 /* rowInsert: insert one row <row> at <at>
  */
 int rowInsert (Doc *doc, Row *row, int at)
