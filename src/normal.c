@@ -205,6 +205,8 @@ static int delete (Doc *doc, int c)
 			{
 				charsDelete (doc->rows[doc->crow], doc->ccol, tmp);
 				updateRender (doc->rows[doc->crow]);
+				if (doc->ccol >= doc->rows[doc->crow]->len)
+					cursorLeft (doc);
 			}
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			doc->modified = 1;

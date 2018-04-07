@@ -129,6 +129,6 @@ int addClipboardRow (Doc *doc, int from, int len)
 	for (int i = 0; i < len; ++i)
 		cb.clipBuf.r[i] = cpyRow (doc->rows[from + i]);
 	cb.len = len;
-	
+
 	return 0;
 }
