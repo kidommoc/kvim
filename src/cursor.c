@@ -4,7 +4,7 @@ int cursorUp (Doc *doc)
 {
 	/* the width of screen excluding the width of line number
 	 */
-	int cols = kvim.cols - doc->lnlen - 1;
+	int cols = kvim.cols - doc->lnlen - 2;
 	/* if not at the first line
 	 */
 	if (doc->crow > 0)
@@ -14,19 +14,19 @@ int cursorUp (Doc *doc)
 		--doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
-			kvim.cx = doc->lnlen + 2;
+			kvim.cx = doc->lnlen + 3;
 			doc->ccol = 0;
 		}
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
 			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % cols
-				+ 2 + doc->lnlen;
+				+ 3 + doc->lnlen;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
-			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 2
+			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 3
 				+ doc->lnlen;
 		}
 		kvim.cy -= doc->rows[doc->crow]->rlen / cols
@@ -49,7 +49,7 @@ int cursorDown (Doc *doc)
 {
 	/* the width of screen excluding the width of line number
 	 */
-	int cols = kvim.cols - doc->lnlen - 1;
+	int cols = kvim.cols - doc->lnlen - 2;
 	/* if not at the last line
 	 */
 	if (doc->crow < doc->len - 1)
@@ -59,19 +59,19 @@ int cursorDown (Doc *doc)
 		++doc->crow;
 		if (doc->rows[doc->crow]->len == 0)
 		{
-			kvim.cx = doc->lnlen + 2;
+			kvim.cx = doc->lnlen + 3;
 			doc->ccol = 0;
 		}
 		else if (doc->crcol < doc->rows[doc->crow]->rlen)
 		{
 			doc->ccol = getContentCol (doc->rows[doc->crow], doc->crcol);
 			kvim.cx = getRenderCol (doc->rows[doc->crow], doc->ccol) % cols
-				+ 2 + doc->lnlen;
+				+ 3 + doc->lnlen;
 		}
 		else
 		{
 			doc->ccol = doc->rows[doc->crow]->len - 1;
-			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 2
+			kvim.cx = (doc->rows[doc->crow]->rlen - 1) % cols + 3
 				+ doc->lnlen;
 		}
 		kvim.cy += getRenderCol (doc->rows[doc->crow], doc->ccol) / cols
@@ -92,7 +92,7 @@ int cursorDown (Doc *doc)
 
 int cursorRight (Doc *doc)
 {
-	int cols = kvim.cols - doc->lnlen - 1;
+	int cols = kvim.cols - doc->lnlen - 2;
 	/* only if not at the most right position
 	 * will cursor move right
 	 */
@@ -107,7 +107,7 @@ int cursorRight (Doc *doc)
 		 */
 		if (l / cols - l1 / cols > 0)
 		{
-			kvim.cx = doc->lnlen + 2;
+			kvim.cx = doc->lnlen + 3;
 			/* if reach the bottom of screen
 			 */
 			if (kvim.rows - kvim.cy <= 5)
@@ -128,7 +128,7 @@ int cursorRight (Doc *doc)
 				++kvim.cy;
 		}
 		else
-			kvim.cx = l % cols + 2 + doc->lnlen;
+			kvim.cx = l % cols + 3 + doc->lnlen;
 	}
 	/* change rendered position
 	 */
@@ -137,7 +137,7 @@ int cursorRight (Doc *doc)
 
 int cursorLeft (Doc *doc)
 {
-	int cols = kvim.cols - doc->lnlen - 1;
+	int cols = kvim.cols - doc->lnlen - 2;
 	/* only if not at the most left position
 	 * will cursor move left
 	 */
@@ -173,7 +173,7 @@ int cursorLeft (Doc *doc)
 				--kvim.cy;
 		}
 		else
-			kvim.cx = l % cols + 2 + doc->lnlen;
+			kvim.cx = l % cols + 3 + doc->lnlen;
 	}
 	/* change rendered position
 	 */

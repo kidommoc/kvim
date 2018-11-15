@@ -11,7 +11,7 @@ static int init (char *filename)
 	setStatus ("MODE: NORMAL", 12);
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);
-	kvim.cx = kvim.doc[0]->lnlen + 2;
+	kvim.cx = kvim.doc[0]->lnlen + 3;
 	kvim.ib.len = 0;
 	kvim.sb.searchBuf = NULL;
 	kvim.sb.len = 0;
