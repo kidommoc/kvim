@@ -12,12 +12,12 @@ static int init (char *filename)
 	kvim.doc = malloc (sizeof (Doc*));
 	kvim.doc[0] = docOpen (filename);
 	kvim.cx = kvim.doc[0]->lnlen + 2;
-	ib.len = 0;
-	sb.searchBuf = NULL;
-	sb.len = 0;
-	cb.type = CT_CHAR;
-	cb.clipBuf.c = NULL;
-	cb.clipBuf.r = NULL;
+	kvim.ib.len = 0;
+	kvim.sb.searchBuf = NULL;
+	kvim.sb.len = 0;
+	kvim.cb.type = CT_CHAR;
+	kvim.cb.clipBuf.c = NULL;
+	kvim.cb.clipBuf.r = NULL;
 	return 0;
 }
 
@@ -25,23 +25,23 @@ static int quit (void)
 {
 	if (kvim.status)
 		free (kvim.status);
-	if (sb.searchBuf)
-		free (sb.searchBuf);
+	if (kvim.sb.searchBuf)
+		free (kvim.sb.searchBuf);
 	docClose (kvim.doc[0]);
 	free (kvim.doc);
-	if (cb.type == CT_ROW && cb.clipBuf.r)
+	if (kvim.cb.type == CT_ROW && kvim.cb.clipBuf.r)
 	{
-		for (int i = 0; i < cb.len; ++i)
+		for (int i = 0; i < kvim.cb.len; ++i)
 		{
-			if (cb.clipBuf.r[i]->content)
-				free (cb.clipBuf.r[i]->content);
-			if (cb.clipBuf.r[i]->render)
-				free (cb.clipBuf.r[i]->render);
+			if (kvim.cb.clipBuf.r[i]->content)
+				free (kvim.cb.clipBuf.r[i]->content);
+			if (kvim.cb.clipBuf.r[i]->render)
+				free (kvim.cb.clipBuf.r[i]->render);
 		}
-		free (cb.clipBuf.r);
+		free (kvim.cb.clipBuf.r);
 	}
-	else if (cb.type == CT_CHAR && cb.clipBuf.c)
-		free (cb.clipBuf.c);
+	else if (kvim.cb.type == CT_CHAR && kvim.cb.clipBuf.c)
+		free (kvim.cb.clipBuf.c);
 	termExit ();
 	return 0;
 }

@@ -164,11 +164,11 @@ int shellSearch (void)
 	if (!(len = shell (buf, len, pos)))
 		return 0;
 
-	if (sb.searchBuf)
-		free (sb.searchBuf);
-	sb.len = len - 1;
-	sb.searchBuf = malloc (sb.len);
-	memcpy (sb.searchBuf, buf + 1, sb.len);
+	if (kvim.sb.searchBuf)
+		free (kvim.sb.searchBuf);
+	kvim.sb.len = len - 1;
+	kvim.sb.searchBuf = malloc (kvim.sb.len);
+	memcpy (kvim.sb.searchBuf, buf + 1, kvim.sb.len);
 	free (buf);
 	handleNormal ('n');
 

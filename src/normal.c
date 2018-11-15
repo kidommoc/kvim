@@ -32,9 +32,9 @@ static int move (Doc *doc, int c)
 					cursorRight (doc);
 			break;
 		case 'g':
-			if (ib.len && ib.inputBuf[ib.len - 1] == 'g')
+			if (kvim.ib.len && kvim.ib.inputBuf[kvim.ib.len - 1] == 'g')
 			{
-				ib.len = 0;
+				kvim.ib.len = 0;
 				tmp = doc->ccol;
 				for (int i = 0; i < tmp; ++i)
 					cursorLeft (doc);
@@ -46,7 +46,7 @@ static int move (Doc *doc, int c)
 				appendInputBuf (c);
 			break;
 		case 'G':
-			if (ib.len == 0)
+			if (kvim.ib.len == 0)
 			{
 				tmp = doc->ccol;
 				for (int i = 0; i < tmp; ++i)
@@ -57,7 +57,7 @@ static int move (Doc *doc, int c)
 			}
 			else
 			{
-				ib.len = 0;
+				kvim.ib.len = 0;
 				tmp = getIbNum () - 1;
 				if (!tmp)
 					tmp = doc->len;
@@ -153,13 +153,13 @@ static int insert (Doc *doc, int c)
 	switch (c)
 	{
 		case 'i':
-			ib.len = 0;
+			kvim.ib.len = 0;
 			kvim.mode = MODE_INSERT;
 			setStatus ("MODE: INSERT", 12);
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
 			break;
 		case 'a':
-			ib.len = 0;
+			kvim.ib.len = 0;
 			cursorRight (doc);
 			handleNormal ('i');
 			break;
@@ -216,9 +216,9 @@ static int delete (Doc *doc, int c)
 			handleNormal ('i');
 			break;
 		case 'd':
-			if (ib.len && ib.inputBuf[ib.len - 1] == 'd')
+			if (kvim.ib.len && kvim.ib.inputBuf[kvim.ib.len - 1] == 'd')
 			{
-				--ib.len;
+				--kvim.ib.len;
 				tmp = getIbNum ();
 				tmp = MIN (tmp, doc->len - doc->crow);
 				for (int i = 0; i < doc->ccol; ++i)
@@ -241,9 +241,9 @@ static int copy_paste (Doc *doc, int c)
 	switch (c)
 	{
 		case 'y':
-			if (ib.len && ib.inputBuf[ib.len - 1] == 'y')
+			if (kvim.ib.len && kvim.ib.inputBuf[kvim.ib.len - 1] == 'y')
 			{
-				--ib.len;
+				--kvim.ib.len;
 				int tmp = getIbNum (), tmp1;
 				tmp = MIN (tmp, doc->len - doc->crow);
 				addClipboardRow (doc, doc->crow, tmp);
@@ -259,35 +259,36 @@ static int copy_paste (Doc *doc, int c)
 				appendInputBuf (c);
 			break;
 		case 'p':
-			if (cb.type == CT_CHAR)
+			if (kvim.cb.type == CT_CHAR)
 			{
-				charsInsert (doc->rows[doc->crow], cb.clipBuf.c,
-					doc->ccol + 1, cb.len);
+				charsInsert (doc->rows[doc->crow], kvim.cb.clipBuf.c,
+					doc->ccol + 1, kvim.cb.len);
 				updateRender (doc->rows[doc->crow]);
-				for (int i = 0; i < cb.len; ++i)
+				for (int i = 0; i < kvim.cb.len; ++i)
 					cursorRight (doc);
 			}
-			else if (cb.type == CT_ROW)
-				for (int i = 0; i < cb.len; ++i)
+			else if (kvim.cb.type == CT_ROW)
+				for (int i = 0; i < kvim.cb.len; ++i)
 				{
-					rowInsert (doc, cpyRow (cb.clipBuf.r[i]),
+					rowInsert (doc, cpyRow (kvim.cb.clipBuf.r[i]),
 						doc->crow + 1);
 					cursorDown (doc);
 				}
 			doc->modified = 1;
 			break;
 		case 'P':
-			if (cb.type == CT_CHAR)
+			if (kvim.cb.type == CT_CHAR)
 			{
-				charsInsert (doc->rows[doc->crow], cb.clipBuf.c,
-					doc->ccol, cb.len);
+				charsInsert (doc->rows[doc->crow], kvim.cb.clipBuf.c,
+					doc->ccol, kvim.cb.len);
 				updateRender (doc->rows[doc->crow]);
-				for (int i = 0; i < cb.len - 1; ++i)
+				for (int i = 0; i < kvim.cb.len - 1; ++i)
 					cursorRight (doc);
 			}
-			else if (cb.type == CT_ROW)
-				for (int i = cb.len - 1; i >= 0; --i)
-					rowInsert (doc, cpyRow (cb.clipBuf.r[i]), doc->crow);
+			else if (kvim.cb.type == CT_ROW)
+				for (int i = kvim.cb.len - 1; i >= 0; --i)
+					rowInsert (doc, cpyRow (kvim.cb.clipBuf.r[i]),
+						doc->crow);
 			break;
 			doc->modified = 1;
 		default:
@@ -373,17 +374,17 @@ static int search (Doc *doc, int c)
 				cursorLeft (doc);
 			break;
 		case 'n':
-			if (sb.len)
+			if (kvim.sb.len)
 			{
 				tmp1 = doc->crow;
 				tmp2 = doc->ccol + 1;
-				if (searchDocForward (doc, sb.searchBuf, sb.len,
+				if (searchDocForward (doc, kvim.sb.searchBuf, kvim.sb.len,
 					&tmp1, &tmp2))
 				{
 					tmp1 = 0;
 					tmp2 = 0;
-					if (searchDocForward (doc, sb.searchBuf, sb.len,
-						&tmp1, &tmp2))
+					if (searchDocForward (doc, kvim.sb.searchBuf,
+						kvim.sb.len, &tmp1, &tmp2))
 						setStatus ("No result!", 10);
 					else
 					{
@@ -415,16 +416,16 @@ static int search (Doc *doc, int c)
 				;
 			break;
 		case 'N':
-			if (sb.len)
+			if (kvim.sb.len)
 			{
 				tmp1 = doc->crow;
 				tmp2 = doc->ccol;
-				if (searchDocBack (doc, sb.searchBuf, sb.len,
+				if (searchDocBack (doc, kvim.sb.searchBuf, kvim.sb.len,
 					&tmp1, &tmp2))
 				{
 					tmp1 = doc->len - 1;
 					tmp2 = doc->rows[doc->len - 1]->len - 1;
-					if (searchDocBack (doc, sb.searchBuf, sb.len,
+					if (searchDocBack (doc, kvim.sb.searchBuf, kvim.sb.len,
 						&tmp1, &tmp2))
 						setStatus ("No result!", 10);
 					else
@@ -457,7 +458,7 @@ static int search (Doc *doc, int c)
 				;
 			break;
 		case '/':
-			ib.len = 0;
+			kvim.ib.len = 0;
 			shellSearch ();
 			break;
 		default:
@@ -539,7 +540,7 @@ int handleNormal (int c)
 	switch (c)
 	{
 		case ESC:
-			ib.len = 0;
+			kvim.ib.len = 0;
 			break;
 		case 'h':
 		case ARROWLEFT:
@@ -577,7 +578,7 @@ int handleNormal (int c)
 			replace (doc);
 			break;
 		case 'R':
-			ib.len = 0;
+			kvim.ib.len = 0;
 			kvim.mode = MODE_REPLACE;
 			setStatus ("MODE: REPLACE", 13);
 			doc->crcol = getRenderCol (doc->rows[doc->crow], doc->ccol);
@@ -592,7 +593,7 @@ int handleNormal (int c)
 			search (doc, c);
 			break;
 		case '0':
-			if (ib.len == 0)
+			if (kvim.ib.len == 0)
 			{
 				move (doc, c);
 				break;
@@ -606,18 +607,18 @@ int handleNormal (int c)
 		case '7':
 		case '8':
 		case '9':
-			if (ib.len == 0 ||
-				(ib.inputBuf[ib.len - 1] >= '0' &&
-				ib.inputBuf[ib.len - 1] <= '9'))
+			if (kvim.ib.len == 0 ||
+				(kvim.ib.inputBuf[kvim.ib.len - 1] >= '0' &&
+				kvim.ib.inputBuf[kvim.ib.len - 1] <= '9'))
 				appendInputBuf (c);
 			else
-				ib.len = 0;
+				kvim.ib.len = 0;
 			break;
 		case CTRL_G:
 			displayInfo (doc);
 			break;
 		case ':':
-			ib.len = 0;
+			kvim.ib.len = 0;
 			if (shellCommand () == 2)
 				return 2;
 			break;

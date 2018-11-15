@@ -74,6 +74,43 @@ typedef struct Doc
 	Row **rows;
 } Doc;
 
+/* InputBuf
+ * inputBuf: input buffer
+ * iblen: the length of input buffer
+ */
+struct InputBuf
+{
+	int len;
+	int inputBuf[100];
+};
+
+/* SearchBuf
+ * searchBuf: search buffer
+ * sblen: the length of search buffer
+ */
+struct SearchBuf
+{
+	int len;
+	char *searchBuf;
+};
+
+/* Clipboard
+ * clipbuf: clip buffer
+ * len: the length of clip buffer
+ * type: the type of clip buffer (CHAR or ROW)
+ */
+#define CT_CHAR 0
+#define CT_ROW 1
+struct Clipboard
+{
+	int len, type;
+	union ClipBuf
+	{
+		char *c;
+		Row **r;
+	} clipBuf;
+};
+
 /* --- Editor mode --- */
 #define MODE_NORMAL 0
 #define MODE_INSERT 1
@@ -96,45 +133,11 @@ struct Kvim
 	struct termios termIn, termOut;
 	int stlen;
 	char *status;
+	struct InputBuf ib;
+	struct SearchBuf sb;
+	struct Clipboard cb;
 	Doc **doc;
 } kvim;
-
-/* InputBuf
- * inputBuf: input buffer
- * iblen: the length of input buffer
- */
-struct InputBuf
-{
-	int len;
-	int inputBuf[100];
-} ib;
-
-/* SearchBuf
- * searchBuf: search buffer
- * sblen: the length of search buffer
- */
-struct SearchBuf
-{
-	int len;
-	char *searchBuf;
-} sb;
-
-/* Clipboard
- * clipbuf: clip buffer
- * len: the length of clip buffer
- * type: the type of clip buffer (CHAR or ROW)
- */
-#define CT_CHAR 0
-#define CT_ROW 1
-struct ClipBoard
-{
-	int len, type;
-	union ClipBuf
-	{
-		char *c;
-		Row **r;
-	} clipBuf;
-} cb;
 
 /* === Declaration === */
 

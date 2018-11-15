@@ -155,15 +155,19 @@ int printContent (Doc *doc)
 {
 	write (STDOUT, "\x1b[2J\x1b[3J\x1b[H", 11);
 	char *buf = malloc (kvim.rows * kvim.cols);
+	/* len: the length of buf
+	 * before: how many chars before the cursor in the row
+	 * left: how many lines above the row
+	 * col: how many chars printed in the row
+	 */
 	int len = 0, before = 0, row, col, left;
-	int cols = kvim.cols - doc->lnlen - 1;
+	int cols = kvim.cols - doc->lnlen - 2;
 
-	if (doc->rows[doc->crow]->len == 0)
-		before = 0;
-	else
-		before = getRenderCol (doc->rows[doc->crow], doc->ccol);
+	before = getRenderCol (doc->rows[doc->crow], doc->ccol);
 	left = kvim.cy - 1 - before / cols;
 
+	/* get the first row on the screen
+	 */
 	row = doc->crow;
 	if (left > 0)
 	{
@@ -181,10 +185,12 @@ int printContent (Doc *doc)
 				appendBuf (buf, &len, " ", 1);
 			continue;
 		}
+		/* the first line of a row has a line number
+		 */
 		if (i == 0 || col == 0)
 		{
 			int l = getNumLen (doc->rows[row]->ind + 1);
-			for (int j = 0; j < doc->lnlen - l; ++j)
+			for (int j = 0; j < doc->lnlen - l + 1; ++j)
 				appendBuf (buf, &len, " ", 1);
 			char *s = convertNumToStr (doc->rows[row]->ind + 1, &l);
 			appendBuf (buf, &len, s, l);
@@ -192,9 +198,11 @@ int printContent (Doc *doc)
 			appendBuf (buf, &len, " ", 1);
 		}
 		else
-			for (int j = 0; j < doc->lnlen + 1; ++j)
+			for (int j = 0; j < doc->lnlen + 2; ++j)
 				appendBuf (buf, &len, " ", 1);
 
+		/* if this line reach the end of the row
+		 */
 		if (col + cols > doc->rows[row]->rlen)
 		{
 			appendBuf (buf, &len, doc->rows[row]->render + col,

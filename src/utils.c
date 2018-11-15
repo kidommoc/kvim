@@ -55,15 +55,15 @@ int setStatus (const char *buf, int len)
 
 int appendInputBuf (int c)
 {
-	ib.inputBuf[ib.len] = c;
-	++ib.len;
+	kvim.ib.inputBuf[kvim.ib.len] = c;
+	++kvim.ib.len;
 	return 0;
 }
 
 int getIbNum (void)
 {
-	int n = convertStrToNum (ib.inputBuf, ib.len);
-	ib.len = 0;
+	int n = convertStrToNum (kvim.ib.inputBuf, kvim.ib.len);
+	kvim.ib.len = 0;
 	return n;
 }
 
@@ -78,29 +78,35 @@ int compareStr (char *str1, char *str2, int len)
 	return 1;
 }
 
+int cleanClipboard (void)
+{
+	if (kvim.cb.type == CT_ROW && kvim.cb.clipBuf.r)
+	{
+		for (int i = 0; i < kvim.cb.len; ++i)
+		{
+			if (kvim.cb.clipBuf.r[i]->content)
+				free (kvim.cb.clipBuf.r[i]->content);
+			if (kvim.cb.clipBuf.r[i]->render)
+				free (kvim.cb.clipBuf.r[i]->render);
+		}
+		free (kvim.cb.clipBuf.r);
+	}
+	else if (kvim.cb.type == CT_CHAR && kvim.cb.clipBuf.c)
+		free (kvim.cb.clipBuf.c);
+	return 0;
+}
+
 int addClipboardChar (Row *row, int from, int len)
 {
 	if (from + len > row->len)
 		len = row->len - from;
 
-	if (cb.type == CT_ROW && cb.clipBuf.r)
-	{
-		for (int i = 0; i < cb.len; ++i)
-		{
-			if (cb.clipBuf.r[i]->content)
-				free (cb.clipBuf.r[i]->content);
-			if (cb.clipBuf.r[i]->render)
-				free (cb.clipBuf.r[i]->render);
-		}
-		free (cb.clipBuf.r);
-	}
-	else if (cb.type == CT_CHAR && cb.clipBuf.c)
-		free (cb.clipBuf.c);
-	cb.type = CT_CHAR;
+	cleanClipboard ();
+	kvim.cb.type = CT_CHAR;
 
-	cb.clipBuf.c = malloc (len);
-	memcpy (cb.clipBuf.c, row->content + from, len);
-	cb.len = len;
+	kvim.cb.clipBuf.c = malloc (len);
+	memcpy (kvim.cb.clipBuf.c, row->content + from, len);
+	kvim.cb.len = len;
 
 	return 0;
 }
@@ -110,25 +116,13 @@ int addClipboardRow (Doc *doc, int from, int len)
 	if (from + len > doc->len)
 		len = doc->len - from;
 
-	if (cb.type == CT_ROW && cb.clipBuf.r)
-	{
-		for (int i = 0; i < cb.len; ++i)
-		{
-			if (cb.clipBuf.r[i]->content)
-				free (cb.clipBuf.r[i]->content);
-			if (cb.clipBuf.r[i]->render)
-				free (cb.clipBuf.r[i]->render);
-		}
-		free (cb.clipBuf.r);
-	}
-	else if (cb.type == CT_CHAR && cb.clipBuf.c)
-		free (cb.clipBuf.c);
-	cb.type = CT_ROW;
+	cleanClipboard ();
+	kvim.cb.type = CT_ROW;
 
-	cb.clipBuf.r = malloc (len * sizeof (Row*));
+	kvim.cb.clipBuf.r = malloc (len * sizeof (Row*));
 	for (int i = 0; i < len; ++i)
-		cb.clipBuf.r[i] = cpyRow (doc->rows[from + i]);
-	cb.len = len;
+		kvim.cb.clipBuf.r[i] = cpyRow (doc->rows[from + i]);
+	kvim.cb.len = len;
 
 	return 0;
 }
